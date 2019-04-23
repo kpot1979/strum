@@ -1,0 +1,283 @@
+<!DOCTYPE HTML>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=1200">
+    <link rel="stylesheet" href="/css/bootstrap.css" type="text/css"/>
+    <script src="/js/script.js"></script>
+    <meta name="description" content="Программа расчета тока короткого замыкания в сети 0,4 кВ по ГОСТ 28249-93">
+    <meta name="author" content="Андрюхин Сергей">
+    <title>Расчет тока короткого замыкания в сети 0,4 кВ</title>
+</head>
+
+<body id="body">
+<div id="modal" class="modal fade">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+            <div class="modal-header">
+                <button type="button" id="modal-close" class="close"><span>&times;</span></button>
+            </div>
+            <div id="modal-body" class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+<nav class="navbar navbar-default navbar-static-top navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-left">
+            <span id="calcCurrentKz" onclick="tokKz();" class="btn btn-primary navbar-btn">Расчитать ток КЗ</span>
+            <span id="reportCurrentKz" onclick="report();" class="btn btn-success"><i><svg
+                    xmlns="http://www.w3.org/2000/svg" width="10.69" height="15" viewBox="0 0 10.69 15"><polygon
+                    points="6.96 0.5 0.5 0.5 0.5 14.5 10.19 14.5 10.19 3.73 6.96 0.5" fill="none" stroke="#fff"
+                    stroke-miterlimit="10"/><polyline points="10.19 3.73 6.96 3.73 6.96 0.5 6.96 3.73" fill="none"
+                                                      stroke="#fff" stroke-miterlimit="10"/><line x1="2.12" y1="5.88"
+                                                                                                  x2="8.58" y2="5.88"
+                                                                                                  fill="none"
+                                                                                                  stroke="#fff"
+                                                                                                  stroke-miterlimit="10"/><line
+                    x1="2.12" y1="8.04" x2="8.58" y2="8.04" fill="none" stroke="#fff" stroke-miterlimit="10"/><line
+                    x1="2.12" y1="10.19" x2="8.58" y2="10.19" fill="none" stroke="#fff" stroke-miterlimit="10"/><line
+                    x1="2.12" y1="12.35" x2="6.42" y2="12.35" fill="none" stroke="#fff"
+                    stroke-miterlimit="10"/></svg></i> Показать расчет</span>
+        </div>
+        <div class="navbar-right"></div>
+        <div class="navbar-right">
+            <span id="saveFileScheme" onclick="saveFileScheme();" class="btn btn-default navbar-btn"><i><svg xmlns="http://www.w3.org/2000/svg" width="13.8" height="14.04"><path fill="#010002" d="M10.78 0H3.19L0 2.85v11.19h7.59v-1H1.13V3.95H4.4V1h5.24v3.11h1.14V0z"/><path d="M13.78 10.13a.19.19 0 0 0-.17-.12h-2.07V5.44a.18.18 0 0 0-.19-.18h-3a.18.18 0 0 0-.19.18V10H6.08a.2.2 0 0 0-.18.12.19.19 0 0 0 0 .2L9.7 14a.24.24 0 0 0 .14 0 .21.21 0 0 0 .16 0l3.77-3.66a.19.19 0 0 0 .01-.21z"/></svg></i> Сохранить проект в файл</span>
+            <span id="loadFileScheme" onclick="loadFileScheme();" class="btn btn-default navbar-btn"><i><svg xmlns="http://www.w3.org/2000/svg" width="13.8" height="14.04"><path fill="#010002" d="M10.78 0H3.19L0 2.85v11.19h7.59v-1H1.13V3.95H4.4V1h5.24v3.11h1.14V0z"/><path d="M5.9 9.17a.19.19 0 0 0 .18.11h2.06v4.58a.19.19 0 0 0 .19.18h3a.18.18 0 0 0 .18-.18V9.28h2.08a.18.18 0 0 0 .15-.28L10 5.31a.19.19 0 0 0-.13 0 .24.24 0 0 0-.14 0L5.94 9a.18.18 0 0 0-.04.17z"/></svg></i> Загрузить проект из файла</span>
+            <span id="saveLocalScheme" onclick="saveLocalScheme();" class="btn btn-default navbar-btn"><i><svg
+                    xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14"><path
+                    d="M3.5,12.83h7V9.33h-7Zm8.17,0h1.17V4.67a1,1,0,0,0-.09-.35A1,1,0,0,0,12.56,4L10,1.44a1,1,0,0,0-.31-.18,1,1,0,0,0-.36-.09V5a.87.87,0,0,1-.87.88H3.21A.87.87,0,0,1,2.33,5V1.17H1.17V12.83H2.33V9a.87.87,0,0,1,.88-.87h7.58a.87.87,0,0,1,.88.88ZM8.17,4.38V1.46a.3.3,0,0,0-.29-.29H6.13a.3.3,0,0,0-.29.29V4.38a.3.3,0,0,0,.29.29H7.88a.3.3,0,0,0,.29-.29ZM14,4.67v8.46a.87.87,0,0,1-.87.88H.88a.84.84,0,0,1-.62-.26A.84.84,0,0,1,0,13.13V.88A.84.84,0,0,1,.26.26.84.84,0,0,1,.88,0H9.33a2.1,2.1,0,0,1,.8.18,2.12,2.12,0,0,1,.69.44l2.55,2.55a2.12,2.12,0,0,1,.44.69A2.1,2.1,0,0,1,14,4.67Z"/></svg></i> Сохранить проект</span>
+            <span id="loadLocalScheme" onclick="loadLocalScheme();" class="btn btn-default navbar-btn"><i><svg
+                    xmlns="http://www.w3.org/2000/svg" width="18.6" height="14" viewBox="0 0 18.6 14"><path
+                    d="M14,4.67a4.67,4.67,0,1,0-9.33,0A4.67,4.67,0,0,0,0,9.49,4.81,4.81,0,0,0,4.9,14H7a.73.73,0,0,0,.78-.78V10.89H6.85A.78.78,0,0,1,6.3,9.57L8.79,7.08a.75.75,0,0,1,1.09,0l2.49,2.49a.78.78,0,0,1-.54,1.32h-.93v2.33a.73.73,0,0,0,.78.78h2.1a4.69,4.69,0,0,0,4.82-4.51A4.56,4.56,0,0,0,14,4.67Z"/></svg></i> Загрузить проект</span>
+        </div>
+
+    </div>
+</nav>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div id="projectResult">
+            </div>
+            <div id="projectSet">
+                <h1 class="h3">Программа расчета токов КЗ 0,4кВ (ГОСТ 28249-93)</h1>
+                <form method="post" action="" id="formKz">
+                    <div class="form-inline mb1">
+                        <div class="form-group">
+                            <label><i>Выбор сопротивления дуги </i></label>
+                            <select id="arcSelect" class="form-control" name="arcSelect">
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input name="arcInput" class="form-control w1" id="arcInput" type="text" value=""
+                                   autocomplete="off"> мОм
+                        </div>
+                    </div>
+                    <table id="tableKz" class="table">
+                        <thead>
+                        <tr>
+                            <th class="td-element">Элемент</th>
+                            <th class="td-element-elementScheme">Схема</th>
+                            <th>Данные</th>
+                            <th class="elementPointKz">Точка КЗ</th>
+                            <th class="rowAddDel">&nbsp;</th>
+                        </tr>
+                        </thead>
+                        <tbody id="dynamic">
+                        <tr class="table-row">
+                            <td class="selector">
+                                <select id="elementSelect" class="form-control w2" name="elementSelect">
+                                </select>
+                            </td>
+                            <td class="elementScheme">
+
+                            </td>
+                            <td class="elementData">
+
+                            </td>
+                            <td class="elementPointKz">
+
+                            </td>
+                            <td class="rowAddDel">
+                                <input type="button" class="add btn btn-success" onclick="addRow();"
+                                       value="Добавить">
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    body {
+        margin-top: 50px;
+    }
+
+    #projectResult {
+        padding-bottom: 25px;
+    }
+
+    #projectResult .close {
+        position: fixed;
+        right: 15px;
+        top: 65px;
+        background: #fff;
+        border: 1px solid #000;
+        text-shadow: none;
+        border-radius: 15px;
+        width: 30px;
+        height: 30px;
+        opacity: .6;
+        outline: none;
+    }
+
+    #projectResult .close:hover {
+        background: #e74c3c;
+        opacity: .8;
+    }
+
+    #projectResult .close span {
+        display: block;
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        font-size: 20px;
+        text-align: center;
+    }
+
+    #projectResult th {
+        vertical-align: middle;
+        text-align: center;
+        background: #f8f8f8;
+    }
+
+    #modal {
+        display: none;
+        background-color: rgba(0, 0, 0, 0.5)
+    }
+
+    .modal-header {
+        padding: 15px 15px 0 15px;
+        border: none;
+    }
+
+    .modal-body {
+        padding: 0 15px 15px 15px;
+    }
+
+    #tableKz th {
+        background: #ddd;
+        margin-top: 20px;
+    }
+
+    .form-inline .form-group {
+        margin-right: 20px;
+    }
+
+    .area {
+        border-bottom: 1px solid #ddd;
+        font-family: verdana;
+    }
+
+    td.elementScheme div {
+        position: relative;
+    }
+
+    td.elementScheme > div::before {
+        content: "";
+        position: absolute;
+        display: block;
+        width: 71px;
+        height: 25px;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="2" height="30.11" viewBox="0 0 2 30.11"><rect width="2" height="30.11"/><polygon points="2 0 0 0 0 30.11 2 30.11 2 0 2 0"/></svg>') no-repeat 36px 0;
+        top: -22px;
+    }
+
+    tr:first-child td.elementScheme div::before {
+        background: none;
+    }
+
+    .resistanceData {
+        position: absolute !Important;
+    }
+
+    .resistanceData span {
+        position: relative;
+        left: 55px;
+        font-family: arial;
+    }
+
+    .energySystemImg .resistanceData span {
+        top: 40px;
+    }
+
+    .hookupImg .resistanceData span {
+        top: 30px;
+    }
+
+    .row svg {
+        display: block;
+    }
+
+    .reportTitle {
+        text-align: center;
+        font-family: arial;
+    }
+
+    .reportTitle span {
+        min-height: 100%;
+        display: table-cell;
+        margin: auto 0;
+    }
+
+    .reportTitle > span {
+        padding-right: 10px;
+    }
+
+    .area {
+        padding-bottom: 15px;
+    }
+
+    .mb1 {
+        margin-bottom: 15px;
+    }
+
+    .mt1 {
+        margin-top: 15px;
+    }
+
+    .img-responsive svg {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 20px;
+    }
+
+    .w1 {
+        width: 80px !Important;
+    }
+    .w2 {
+        width: 280px !Important;
+    }
+    .pointKzWrapper {
+        position: absolute !Important;
+        top:67px;
+        left: 18px;
+    }
+    .pointKzWrapper span {
+        position: absolute !Important;
+        top: 0;
+        left: -22px;
+    }
+    #projectResult .pointKzWrapper {
+        left: 30px;
+    }
+    #dataFileBlock {
+        display: none;
+    }
+
+</style>
+</body>
+</html>
