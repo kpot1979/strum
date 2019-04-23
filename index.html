@@ -1225,8 +1225,12 @@ function saveFileScheme() {
             let id = date.replace(/[: ]/g, '_');
             name = name + id + '.txt';
             let file = new Blob([project], {type: type});
-            elSave.href = URL.createObjectURL(file);
-            elSave.download = name;
+            if (window.navigator.msSaveOrOpenBlob) // IE10+
+                window.navigator.msSaveOrOpenBlob(file, name);
+            else {
+                elSave.href = URL.createObjectURL(file);
+                elSave.download = name;
+            }
             customModal(textProjectSendSaved);
         } catch (err) {
             customModal(textSaveFileError);
