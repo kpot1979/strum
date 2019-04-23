@@ -253,7 +253,12 @@ function prepareTemplate(data) {
     return obj;
 }
 
-function renderTemplateItemData(element, rowId, insert = false) {
+function renderTemplateItemData(element, rowId, insert) {
+    if (insert === true) {
+        insert = true;
+    } else {
+        insert = false;
+    }
     let template = prepareTemplate(templateObj[element]);
     if (insert === true) {
         template = prepareTemplate(schemaObj.templates[rowId]);
