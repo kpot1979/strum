@@ -1141,7 +1141,7 @@ function saveLocalScheme() {
             let date = getDate();
             let id = date.replace(/[.: ]/g, '');
             let str = id + '|' + name + '|' + date;
-            let max = 3;
+            let max = 20;
             if (projectsId.length > max) {
                 let del = projectsId.shift();
                 let delId = del.split('|');
