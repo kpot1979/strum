@@ -652,13 +652,13 @@ function tokKz() {
                     if (kzIdkey == rowId) break;
                 }
                 result.ik3max = (schemaObj.defaultVar.unn * 1000) / (Math.sqrt(3) * Math.sqrt(Math.pow(result.x, 2) + Math.pow(result.r, 2)));
-                result.ik3min = (schemaObj.defaultVar.unn * 1000) / (Math.sqrt(3) * Math.sqrt(Math.pow(result.x, 2) + Math.pow(result.r + schemaObj.defaultVar.arcResistance, 2)));
+                result.ik3min = (schemaObj.defaultVar.unn * 1000) / (Math.sqrt(3) * Math.sqrt(Math.pow(result.x, 2) + Math.pow(result.r + schemaObj.defaultVar.arcResistance*1, 2)));
                 result.iudmax = Math.sqrt(2) * result.ik3max * koefUd(result.r, result.x);
                 result.iudmin = Math.sqrt(2) * result.ik3min * koefUd(result.r, result.x);
                 result.ik2max = (schemaObj.defaultVar.unn * 1000) / (2 * Math.sqrt(Math.pow(result.x, 2) + Math.pow(result.r, 2)));
                 result.ik2min = (schemaObj.defaultVar.unn * 1000) / (2 * Math.sqrt(Math.pow(result.x, 2) + Math.pow(result.r + schemaObj.defaultVar.arcResistance / 2, 2)));
                 result.ik1max = (schemaObj.defaultVar.unn * 1000 * Math.sqrt(3)) / Math.sqrt(Math.pow((2 * result.x) + result.x0, 2) + Math.pow((2 * (result.r)) + (result.r0), 2));
-                result.ik1min = (schemaObj.defaultVar.unn * 1000 * Math.sqrt(3)) / Math.sqrt(Math.pow((2 * result.x) + result.x0, 2) + Math.pow((2 * (result.r + schemaObj.defaultVar.arcResistance)) + (result.r0 + schemaObj.defaultVar.arcResistance), 2));
+                result.ik1min = (schemaObj.defaultVar.unn * 1000 * Math.sqrt(3)) / Math.sqrt(Math.pow((2 * result.x) + result.x0, 2) + Math.pow((2 * (result.r + schemaObj.defaultVar.arcResistance*1)) + (result.r0 + schemaObj.defaultVar.arcResistance*1), 2));
                 calc[kzIdkey] = result;
             }
             schemaObj.calc = calc;
