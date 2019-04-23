@@ -258,7 +258,7 @@ function addOption(arrayStr, value) {
 function prepareTemplate(data) {
     let obj = [];
     for (let i = 0; i < data.length; i++) {
-        obj[i] = Object.assign({}, data[i]);
+        obj[i] = iterationCopy(data[i]);
     }
     return obj;
 }
@@ -376,9 +376,9 @@ function addRow() {
         let table = document.getElementById("tableKz");
         let rowId = (table.rows.length) - 1;
         elementObj[elementSelect].rowId = rowId;
-        schemaObj.elements[rowId] = Object.assign({}, elementObj[elementSelect]);
+        schemaObj.elements[rowId] = iterationCopy(elementObj[elementSelect]);
         schemaObj.templates[rowId] = prepareTemplate(templateObj[elementSelect]);
-        schemaObj.resistance[rowId] = Object.assign({}, resistanceObj[elementSelect]);
+        schemaObj.resistance[rowId] = iterationCopy(resistanceObj[elementSelect]);
         html += "<tr id='row" + rowId + "'>";
         html += "   <td id='elementSelect" + rowId + "'>";
         html += "       <div class='form-inline'>";
@@ -1345,6 +1345,16 @@ function htmlEncode(str) {
     //result = result.replace(/&/g, '&amp;');
     return result;
 };
+
+function iterationCopy(src) {
+  let target = {};
+  for (let prop in src) {
+    if (src.hasOwnProperty(prop)) {
+      target[prop] = src[prop];
+    }
+  }
+  return target;
+}
 </script>
 </head>
 
