@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=1200">
     <link rel="stylesheet" href="css/bootstrap.css" type="text/css"/>
+     <script type="text/javascript" src="js/data.js"></script>
     <meta name="description" content="Программа расчета тока короткого замыкания в сети 0,4 кВ по ГОСТ 28249-93">
     <meta name="author" content="Андрюхин Сергей">
     <title>Расчет тока короткого замыкания в сети 0,4 кВ</title>
@@ -33,6 +34,7 @@ var symbol = {
     avtomat: 'кв',
     unique: ''
 }
+
 
 var shinoprovodArray = ['|--------', '0.034|0.016|0.19|0.18|Шинопровод ШМА4-1250, Uн=0,38/0,66кВ, Iн=1250А', '0.03|0.014|0.14|0.13|Шинопровод ШМА4-1600, Uн=0,38/0,66кВ, Iн=1600А', '0.01|0.005|0.2|0.12|Шинопровод ШМА4-3200, Uн=0,38/0,66кВ, Iн=3200А', '0.02|0.02|0.23|0.16|Шинопровод ШМА68П, Uн=0,38/0,66кВ, Iн=2500А', '0.013|0.015|0.23|0.15|Шинопровод ШМА68П, Uн=0,38/0,66кВ, Iн=4000А', '0.21|0.21|0.84|0.84|Шинопровод ШРА73, Uн=0,38кВ, Iн=250А', '0.15|0.17|0.64|0.67|Шинопровод ШРА73, Uн=0,38кВ, Iн=400А', '0.1|0.13|0.59|0.62|Шинопровод ШРА73, Uн=0,38кВ, Iн=630А']; //r|x|r нулевого проводника|x нулевого проводника|название (mOm/m)
 
@@ -133,7 +135,8 @@ var uniqueTemplate = [
 ];
 
 var complexTemplate = [
-    new InitTemplateItem('select', 'complex', 'form-control w2', null, null, '<i>Состав потребителей </i> = ', 'changeElementComplex', '<div class=\"form-group\">', '</div>', '', 'complexArray'),
+    new InitTemplateItem('select', 'complexSelector', 'form-control w2', null, null, '<i>Состав потребителей </i> = ', 'changeElementComplex', '<div class=\"form-group\">', '</div>', '', 'complexArray'),
+    new InitTemplateItem('input', 'complexCosF', 'form-control w1', '', null, '<i>cos&phi; </i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'null'),
 ];
 
 var energySystemResistance = {r: null, x: null, r0: null, x0: null};
@@ -157,7 +160,7 @@ var hookupObj = new ElementsDataObj('hookup', 'Контактные соедин
 var ttObj = new ElementsDataObj('tt', 'Трансформатор тока', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
 var avtomatObj = new ElementsDataObj('avtomat', 'Автоматический выключатель', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
 var uniqueObj = new ElementsDataObj('unique', 'Свой элемент', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
-var complexObj = new ElementsDataObj('complex', 'Комплексная нагрузка', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
+var complexObj = new ElementsDataObj('complex', 'Комплексная нагрузка', null, null, null, '<div class=\"form-inline\">{tpl}</div><div id=\"complex-data\" class=\"form-inline\">{tpl}</div>');
 
 
 var elementObj = {
@@ -1418,7 +1421,23 @@ function changeElementComplex(elementId, rowId) {
     let elSelect = document.getElementById(elementId);
     let elSelectValue = elSelect.value;
     console.log(elSelectValue);
+    renderTemplComplex(elSelectValue,rowId);
+} 
+
+function renderTemplComplex(elSelectValue, rowId) {
+    let html = '';
+    html += "<div class=\"form-inline\">";
+    let titleArray = elSelectValue.split('_');
+    console.log(titleArray);
+    for (let i = 0; i < titleArray.length; i++) {
+        html += "   <div class=\"form-group\"><label for=\""+titleArray[i]+rowId+"\"><i>" + complexTitle[titleArray[i]] + " </i> = </label>";
+        html += "       <input id=\""+titleArray[i]+rowId+"\" onchange=\"changeElementValue(this.id, "+rowId+")\" class=\"form-control w1\" type=\"text\" name=\""+titleArray[i]+rowId+"\" value=\"\">";
+        html += "   </div>";
+    }
+    html += "</div>"; 
+    document.getElementById("complex-data").innerHTML = html;
 }
+
 </script>
 </head>
 
