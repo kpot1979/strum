@@ -124,19 +124,19 @@ var ttTemplate = [
     new InitTemplateItem('input', 'ttQuantity', 'form-control w1', '1', null, '<i>Кол-во</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' шт.', null)
 ];
 var avtomatTemplate = [
-    new InitTemplateItem('select', 'avtomat', 'form-control w2', null, null, '<i>Автомат </i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', ''),
+    new InitTemplateItem('select', 'avtomat', 'form-control w2', null, null, '<i>Автомат </i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'avtomatArray'),
     new InitTemplateItem('input', 'avtomatQuantity', 'form-control w1', '1', null, '<i>Кол-во</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' шт.', null)
 ];
 var uniqueTemplate = [
     new InitTemplateItem('input', 'uniqueR', 'form-control w1', '', null, '<i>R</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' мОм', null),
-    new InitTemplateItem('input', 'uniqueX', 'form-contavtomatArrayrol w1', '', null, '<i>X</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' мОм', null),
+    new InitTemplateItem('input', 'uniqueX', 'form-control w1', '', null, '<i>X</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' мОм', null),
     new InitTemplateItem('input', 'uniqueR0', 'form-control w1', '', null, '<i>R</i><sub>0</sub> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' мОм', null),
     new InitTemplateItem('input', 'uniqueX0', 'form-control w1', '', null, '<i>X</i><sub>0</sub> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' мОм', null),
 ];
 
 var complexTemplate = [
     new InitTemplateItem('select', 'complexSelector', 'form-control w2', null, null, '<i>Состав потребителей </i> = ', 'changeElementComplex', '<div class=\"form-group\">', '</div>', '', 'complexArray'),
-    new InitTemplateItem('input', 'complexCosF', 'form-control w1', '', null, '<i>cos&phi; </i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'null'),
+    new InitTemplateItem('input', 'complexCosF', 'form-control w1', '', null, '<i>cos&phi; </i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
 ];
 
 var energySystemResistance = {r: null, x: null, r0: null, x0: null};
@@ -1418,24 +1418,26 @@ function iterationCopy(src) {
 }
 
 function changeElementComplex(elementId, rowId) {
+    changeElementValue(elementId, rowId);
     let elSelect = document.getElementById(elementId);
     let elSelectValue = elSelect.value;
-    console.log(elSelectValue);
     renderTemplComplex(elSelectValue,rowId);
 } 
 
 function renderTemplComplex(elSelectValue, rowId) {
+    schemaObj.templates[rowId].length = complexTemplate.length;
     let html = '';
-    html += "<div class=\"form-inline\">";
     let titleArray = elSelectValue.split('_');
-    console.log(titleArray);
     for (let i = 0; i < titleArray.length; i++) {
         html += "   <div class=\"form-group\"><label for=\""+titleArray[i]+rowId+"\"><i>" + complexTitle[titleArray[i]] + " </i> = </label>";
         html += "       <input id=\""+titleArray[i]+rowId+"\" onchange=\"changeElementValue(this.id, "+rowId+")\" class=\"form-control w1\" type=\"text\" name=\""+titleArray[i]+rowId+"\" value=\"\">";
         html += "   </div>";
+        let complexTemplateLoc = new InitTemplateItem('input', titleArray[i]+rowId, 'form-control w1', '', null, '<i>' + complexTitle[titleArray[i]] +  '</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'null');
+        schemaObj.templates[rowId].push(complexTemplateLoc);
     }
-    html += "</div>"; 
     document.getElementById("complex-data").innerHTML = html;
+    //schemaObj.templates[rowId] = prepareTemplate(complexTemplate);
+    console.log(schemaObj);
 }
 
 </script>
