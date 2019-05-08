@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=1200">
     <link rel="stylesheet" href="css/bootstrap.css" type="text/css"/>
-     <script type="text/javascript" src="js/data.js"></script>
+     <script type="text/javascript" src="data.js"></script>
     <meta name="description" content="Программа расчета тока короткого замыкания в сети 0,4 кВ по ГОСТ 28249-93">
     <meta name="author" content="Андрюхин Сергей">
     <title>Расчет тока короткого замыкания в сети 0,4 кВ</title>
@@ -399,7 +399,7 @@ function deleteRow(rowId) {
     delete schemaObj.resistance[rowId];
     delete schemaObj.kzId[rowId];
     delete schemaObj.calc[rowId];
-    console.log(schemaObj);
+    //console.log(schemaObj);
 }
 
 function addRow() {
@@ -459,7 +459,7 @@ function changeElementValue(elementId, rowId) {
     schemaObj.templates[rowId][templateArrayKey].textItem = elementText;
     calcResistance(rowId);
     addResistance(rowId);
-    console.log(schemaObj);
+    //console.log(schemaObj);
 }
 
 function changeElementTitleValue(elementId, rowId) {
@@ -579,6 +579,53 @@ function calcResistance(rowId) {
         x = template[1].valueItem * 1;
         r0 = template[2].valueItem * 1;
         x0 = template[3].valueItem * 1;
+    } else if (element.key == 'complex') {
+        let element = template[0].valueItem;
+        let cosF = template[1].valueItem;
+        let power = [];
+        let powerVal = [];
+        for (let i = 2; i < template.length; i++) {
+            let type = template[i].idItem.split('_');
+            power.push({
+                type : type[0],
+                value : template[i].valueItem,
+                });
+            powerVal.push(template[i].valueItem);
+        }
+        let powerSum = powerVal.reduce(function(sum, current) {
+          return +sum + +current;
+        }, 0);
+
+        var resPower = power.map(function(item) {
+            let resPower = item.value/powerSum;
+            let data = eval(element);
+            let Eng = data.Eng[item.type];
+            let Z1ng = data.Z1ng[item.type];
+            let Z2ng = data.Z2ng[item.type];
+            let Z0ng = data.Z0ng[item.type];
+
+            return resPower;
+        });
+
+        
+        console.log(resPower);
+        console.log(power);
+
+        function koef(r, x) {
+            let rx = r / x;
+            let xr = x / r;
+            let koef, krx, kxr;
+            for (let rxKey in koefUdRX) {
+                let koefRX = koefUdRX[rxKey];
+                rxKey = +rxKey;
+                krx = koefRX;
+                if (rxKey > rx) {
+                    break;
+                }
+            }
+            koef = Math.max(krx, kxr);
+            return koef;
+        }
     }
     resistance.r = r;
     resistance.x = x;
@@ -1243,7 +1290,7 @@ function loadLocalScheme() {
             elLoad.addEventListener("click", function () {
                 let projectId = localStorage.getItem(id);
                 if (projectId !== null) {
-                    console.log(projectId);
+                    //console.log(projectId);
                     renderScheme(projectId);
                 }
             });
@@ -1323,7 +1370,7 @@ function importDataInFile() {
         let data = JSON.parse(dataFileBlock);
         //schemaObj = data;
         renderScheme(JSON.stringify(data));
-console.log(data);  
+//console.log(data);  
 }
 
 function renderScheme(loadedObject) {
@@ -1429,11 +1476,24 @@ function renderTemplComplex(elSelectValue, rowId) {
     let html = '';
     let titleArray = elSelectValue.split('_');
     for (let i = 0; i < titleArray.length; i++) {
+        let complexTemplateLoc = {
+            typeItem : 'input',
+            idItem : titleArray[i] + "_" + rowId,
+            classItem : 'form-control w1',
+            valueItem : '',
+            textItem : null,
+            labelItem : htmlEncode('<i>' + complexTitle[titleArray[i]] +  '</i> = '),
+            functionItem : 'changeElementValue',
+            wrapperItemStart : htmlEncode('<div class=\"form-group\">'),
+            wrapperItemEnd : htmlEncode('</div>'),
+            suffixItem : 'кВт',
+            outerData : null
+        }
+        schemaObj.templates[rowId].push(complexTemplateLoc);        
         html += "   <div class=\"form-group\"><label for=\""+titleArray[i]+rowId+"\"><i>" + complexTitle[titleArray[i]] + " </i> = </label>";
-        html += "       <input id=\""+titleArray[i]+rowId+"\" onchange=\"changeElementValue(this.id, "+rowId+")\" class=\"form-control w1\" type=\"text\" name=\""+titleArray[i]+rowId+"\" value=\"\">";
+        html += "       <input id=\""+titleArray[i]+"_"+rowId+"\" onchange=\"changeElementValue(this.id, "+rowId+")\" class=\"form-control w1\" type=\"text\" data-templatearraykey=\""+(i+complexTemplate.length)+"\" name=\""+titleArray[i]+rowId+"\" value=\"\"> кВт";
         html += "   </div>";
-        let complexTemplateLoc = new InitTemplateItem('input', titleArray[i]+rowId, 'form-control w1', '', null, '<i>' + complexTitle[titleArray[i]] +  '</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'null');
-        schemaObj.templates[rowId].push(complexTemplateLoc);
+        //let complexTemplateLoc = new InitTemplateItem('input', titleArray[i]+rowId, 'form-control w1', '', null, '<i>' + complexTitle[titleArray[i]] +  '</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null);
     }
     document.getElementById("complex-data").innerHTML = html;
     //schemaObj.templates[rowId] = prepareTemplate(complexTemplate);
