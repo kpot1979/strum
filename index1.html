@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=1200">
     <link rel="stylesheet" href="css/bootstrap.css" type="text/css"/>
+    <link rel="stylesheet" href="css/style.css" type="text/css"/>
     <script type="text/javascript" src="data.js"></script>
     <meta name="description" content="Программа расчета тока короткого замыкания в сети 0,4 кВ по ГОСТ 28249-93">
     <meta name="author" content="Андрюхин Сергей">
@@ -19,7 +20,8 @@
                 unn: 0.4,
                 uvn: 6.3,
                 ikz: "",
-                arcResistance: 5
+                arcResistance: 5,
+                cosPphi: 0.8
             }
         };
 
@@ -78,7 +80,7 @@
 
         var complexTemplate = [
             new InitTemplateItem('select', 'complexSelector', 'form-control w2', null, null, '<i>Состав потребителей </i> = ', 'changeElementComplex', '<div class=\"form-group\">', '</div>', '', 'complexArray'),
-            new InitTemplateItem('input', 'complexCosF', 'form-control w1', '', null, '<i>cos&phi; </i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
+            new InitTemplateItem('input', 'complexCosF', 'form-control w1', schemaObj.defaultVar.cosPphi, null, '<i>cos&phi; </i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
         ];
 
         var energySystemResistance = {r: null, x: null, r0: null, x0: null};
@@ -153,6 +155,8 @@
         var textProjectSaved = '<p class=\"text-success\">Спасибо, ваш проект сохранен!</p>';
         var textProjectSendSaved = '<p class=\"text-success\">Спасибо, ваш проект сохранен в файл. Если он не загрузился автоматически, то нажмите кнопку \"Сохранить\" в диалоговом окне.</p>';
         var textSaveFileError = '<p class=\"text-danger\">Ошибка при сохранении проекта в файл!</p>';
+        var textLastEl = '<p class=\"text-danger\">Предыдущий элемент должен быть последним в схеме!</p>';
+        var textCosPphi = '<p class=\"text-danger\">Введите значение cos&phi;!</p>';
 
         window.onload = function () {
             var elementSelect = document.getElementById("elementSelect");
@@ -349,7 +353,7 @@
             if (elementSelect != '') {
                 let lastElement = lastElementObj(schemaObj.elements);
                 if (lastElement && lastElement.key == 'complex') {
-                    customModal(textSelectEl);
+                    customModal(textLastEl);
                 } else {
                     let html = "";
                     let table = document.getElementById("tableKz");
@@ -430,98 +434,152 @@
         function calcResistance(rowId) {
             let element = schemaObj.elements[rowId];
             let template = schemaObj.templates[rowId];
-            let resistance = schemaObj.resistance[rowId];
-            let r = null, x = null, r0 = null, x0 = null;
             if (element.key == 'energySystem') {
-                let uvn = template[0].valueItem;
-                let unn = template[1].valueItem;
-                let ikz = template[2].valueItem;
-                if (uvn === null || unn === null || ikz === null) {
-                    r = x = r0 = x0 = null;
-                } else {
-                    schemaObj.defaultVar.uvn = uvn;
-                    schemaObj.defaultVar.unn = unn;
-                    schemaObj.defaultVar.ikz = ikz;
-                    let xcvn = uvn / (Math.sqrt(3) * ikz);
-                    r = 0;
-                    x = 1000 * xcvn * Math.pow((unn / uvn), 2);
-                    r0 = 0;
-                    x0 = 0;
-                }
+                calcResistanceEnergySystem(rowId, template);
             } else if (element.key == 'transformator') {
-                let transformatorValue = template[0].valueItem;
-                if (transformatorValue === null) {
-                    r = x = r0 = x0 = null;
-                } else {
-                    let transformatorResist = transformatorValue.split('|');
-                    r = transformatorResist[0] * 1;
-                    x = transformatorResist[1] * 1;
-                    r0 = transformatorResist[2] * 1;
-                    x0 = transformatorResist[3] * 1;
-                }
+                calcResistanceTransformator(rowId, template);
             } else if (element.key == 'kabelVn' || element.key == 'kabelNn') {
-                let kabel = template[0].valueItem;
-                let kabelLength = template[1].valueItem;
-                let kabelQuantity = template[2].valueItem;
-                if (kabel === null) {
-                    r = x = r0 = x0 = null;
-                } else {
-                    let kabelValue = kabel.split('|');
-                    let kabelResist = [];
-                    let vnToNn = 1;
-                    if (element.key == 'kabelVn') {
-                        vnToNn = (Math.pow(schemaObj.defaultVar.unn, 2) / (Math.pow(schemaObj.defaultVar.uvn, 2)));
-                    }
-                    for (let i = 0; i < kabelValue.length; i++) {
-                        kabelResist[i] = ((kabelValue[i] * kabelLength) / kabelQuantity) * vnToNn;
-                    }
-                    r = kabelResist[0];
-                    x = kabelResist[1];
-                    r0 = kabelResist[2];
-                    x0 = kabelResist[3];
-                }
+                calcResistanceKabel(rowId, template, element.key);
             } else if (element.key == 'shinoprovod') {
-                let shnp = template[0].valueItem;
-                let shnpLength = template[1].valueItem;
-                if (shnp === null) {
-                    r = x = r0 = x0 = null;
-                } else {
-                    let shnpValue = shnp.split('|');
-                    r = shnpValue[0] * shnpLength;
-                    x = shnpValue[1] * shnpLength;
-                    r0 = (shnpValue[0] * shnpLength) + (3 * shnpValue[2] * shnpLength);
-                    x0 = (shnpValue[1] * shnpLength) + (3 * shnpValue[3] * shnpLength);
-                }
+                calcResistanceShinoprovod(rowId, template);
             } else if (element.key == 'hookup') {
-                let hookup = template[0].valueItem;
-                let hookupQuantity = template[1].valueItem;
-                if (hookup === null) {
-                    r = x = r0 = x0 = null;
-                } else {
-                    let hookupValue = hookup.split('|');
-                    r = hookupValue [0] * hookupQuantity;
-                    x = 0;
-                    r0 = hookupValue [2] * hookupQuantity;
-                    x0 = 0;
-                }
+                calcResistanceHookup(rowId, template);
             } else if (element.key == 'tt' || element.key == 'avtomat') {
-                let tt = template[0].valueItem;
-                let ttQuantity = template[1].valueItem;
-                if (tt === null) {
-                    r = x = r0 = x0 = null;
-                } else {
-                    let ttValue = tt.split('|');
-                    r = ttValue [0] * ttQuantity;
-                    x = ttValue [1] * ttQuantity;
-                    r0 = ttValue [2] * ttQuantity;
-                    x0 = ttValue [3] * ttQuantity;
-                }
+                calcResistanceTt(rowId, template);
             } else if (element.key == 'unique') {
-                r = template[0].valueItem * 1;
-                x = template[1].valueItem * 1;
-                r0 = template[2].valueItem * 1;
-                x0 = template[3].valueItem * 1;
+                calcResistanceUnique(rowId, template);
             } else if (element.key == 'complex') {
+                calcResistanceComplex(rowId, template);
+            }
+        }
+
+        function calcResistanceEnergySystem(rowId, template) {
+            let uvn = template[0].valueItem;
+            let unn = template[1].valueItem;
+            let ikz = template[2].valueItem;
+            let r = null, x = null, r0 = null, x0 = null;
+            if (uvn !== null && unn !== null && ikz !== null) {
+                schemaObj.defaultVar.uvn = uvn;
+                schemaObj.defaultVar.unn = unn;
+                schemaObj.defaultVar.ikz = ikz;
+                let xcvn = uvn / (Math.sqrt(3) * ikz);
+                r = 0;
+                x = 1000 * xcvn * Math.pow((unn / uvn), 2);
+                r0 = 0;
+                x0 = 0;
+            }
+            schemaObj.resistance[rowId].r = r;
+            schemaObj.resistance[rowId].x = x;
+            schemaObj.resistance[rowId].r0 = r0;
+            schemaObj.resistance[rowId].x0 = x0;         
+        }
+
+        function calcResistanceTransformator(rowId, template) {
+            let val = template[0].valueItem;
+            let r = null, x = null, r0 = null, x0 = null;
+            if (val !== null) {
+                let value = val.split('|');
+                r = value[0] * 1;
+                x = value[1] * 1;
+                r0 = value[2] * 1;
+                x0 = value[3] * 1;
+            }
+            schemaObj.resistance[rowId].r = r;
+            schemaObj.resistance[rowId].x = x;
+            schemaObj.resistance[rowId].r0 = r0;
+            schemaObj.resistance[rowId].x0 = x0;
+        }
+
+        function calcResistanceKabel(rowId, template, elementKey) {
+            let val = template[0].valueItem;
+            let length = template[1].valueItem;
+            let quantity = template[2].valueItem;
+            let r = null, x = null, r0 = null, x0 = null;
+            if (val !== null) {
+                let value = val.split('|');
+                let kabelResist = [];
+                let vnToNn = 1;
+                if (elementKey == 'kabelVn') {
+                    vnToNn = (Math.pow(schemaObj.defaultVar.unn, 2) / (Math.pow(schemaObj.defaultVar.uvn, 2)));
+                }
+                for (let i = 0; i < value.length; i++) {
+                    kabelResist[i] = ((value[i] * length) / quantity) * vnToNn;
+                }
+                r = kabelResist[0];
+                x = kabelResist[1];
+                r0 = kabelResist[2];
+                x0 = kabelResist[3];
+            }
+            schemaObj.resistance[rowId].r = r;
+            schemaObj.resistance[rowId].x = x;
+            schemaObj.resistance[rowId].r0 = r0;
+            schemaObj.resistance[rowId].x0 = x0;
+        }
+
+        function calcResistanceShinoprovod(rowId, template) {
+            let val = template[0].valueItem;
+            let length = template[1].valueItem;
+            let r = null, x = null, r0 = null, x0 = null;
+            if (val !== null) {
+                let value = val.split('|');
+                r = value[0] * length;
+                x = value[1] * length;
+                r0 = (value[0] * length) + (3 * value[2] * length);
+                x0 = (value[1] * length) + (3 * value[3] * length);
+            }
+            schemaObj.resistance[rowId].r = r;
+            schemaObj.resistance[rowId].x = x;
+            schemaObj.resistance[rowId].r0 = r0;
+            schemaObj.resistance[rowId].x0 = x0;
+        }
+
+        function calcResistanceHookup(rowId, template) {
+            let val = template[0].valueItem;
+            let quantity = template[1].valueItem;
+            let r = null, x = null, r0 = null, x0 = null;
+            if (val !== null) {
+                let value = val.split('|');
+                r = value[0] * quantity;
+                x = 0;
+                r0 = value[2] * quantity;
+                x0 = 0;
+            }
+            schemaObj.resistance[rowId].r = r;
+            schemaObj.resistance[rowId].x = x;
+            schemaObj.resistance[rowId].r0 = r0;
+            schemaObj.resistance[rowId].x0 = x0;
+        }
+
+        function calcResistanceTt(rowId, template) {
+            let val = template[0].valueItem;
+            let quantity = template[1].valueItem;
+            let r = null, x = null, r0 = null, x0 = null;
+            if (val !== null) {
+                let value = val.split('|');
+                r = value[0] * quantity;
+                x = value[1] * quantity;
+                r0 = value[2] * quantity;
+                x0 = value[3] * quantity;
+            }
+            schemaObj.resistance[rowId].r = r;
+            schemaObj.resistance[rowId].x = x;
+            schemaObj.resistance[rowId].r0 = r0;
+            schemaObj.resistance[rowId].x0 = x0;
+        }
+
+        function calcResistanceUnique(rowId, template) {
+            let r = null, x = null, r0 = null, x0 = null;
+            r = template[0].valueItem * 1;
+            x = template[1].valueItem * 1;
+            r0 = template[2].valueItem * 1;
+            x0 = template[3].valueItem * 1;
+            schemaObj.resistance[rowId].r = r;
+            schemaObj.resistance[rowId].x = x;
+            schemaObj.resistance[rowId].r0 = r0;
+            schemaObj.resistance[rowId].x0 = x0;
+        }
+
+        function calcResistanceComplex(rowId, template) {
                 let element = template[0].valueItem;
                 let cosF = template[1].valueItem;
                 let power = [];
@@ -546,6 +604,7 @@
                     let Z2ng = data.Z2ng[item.type];
                     let Z0ng = data.Z0ng[item.type];
                     let result = [resPower, Eng, Z1ng, Z2ng, Z0ng];
+                    //return data;
                     return result;
                 });
 
@@ -554,25 +613,46 @@
                     koef.push([getKoef(resPower[j][0], resPower[j][1]), getKoef(resPower[j][0], resPower[j][2]), getKoef(resPower[j][0], resPower[j][3]), getKoef(resPower[j][0], resPower[j][4])]);
                 }
 
-
-                //console.log(resPower);
+                let resist = {};
+                let Eng = 0;
+                let Z1ng = 0;
+                let Z2ng = 0;
+                let Z0ng = 0;
+                if (cosF == 0) {
+                    customModal(textCosPphi);
+                } else {
+                    let cur = powerSum / (Math.sqrt(3) * cosF * schemaObj.defaultVar.unn)
+                    let bazis = (380 * 1000) / (Math.sqrt(3) * cur);
+                    for (var j = 0; j < resPower.length; j++) {
+                        Eng += getKoef(resPower[j][0], resPower[j][1]);
+                        Z1ng += getKoef(resPower[j][0], resPower[j][2]);
+                        Z2ng += getKoef(resPower[j][0], resPower[j][3]);
+                        Z0ng += getKoef(resPower[j][0], resPower[j][4]);
+                    }
+                    resist = {
+                        Eng : 380 * Eng/j,
+                        Z1ng : bazis * Z1ng/j,
+                        Z2ng : bazis * Z2ng/j,
+                        Z0ng : bazis * Z0ng/j
+                    }
+                console.log(cur);
                 console.log(koef);
-
+                console.log(resist);
+                }   
             }
-            resistance.r = r;
-            resistance.x = x;
-            resistance.r0 = r0;
-            resistance.x0 = x0;
-        }
 
         function getKoef(power, obj) {
             let result;
-            for (let key in obj) {
-                result = obj[key];
-                key = +key;
-                if (key > power) {
-                    break;
+            if (typeof obj == "object") {
+                for (let key in obj) {
+                    result = obj[key];
+                    key = +key;
+                    if (key > power) {
+                        break;
+                    }
                 }
+            } else {
+                result = 0   
             }
             return result;
         }
@@ -1553,179 +1633,5 @@
         </div>
     </div>
 </div>
-<style>
-    body {
-        margin-top: 50px;
-    }
-
-    #projectResult {
-        padding-bottom: 25px;
-    }
-
-    #projectResult .close {
-        position: fixed;
-        right: 15px;
-        top: 65px;
-        background: #fff;
-        border: 1px solid #000;
-        text-shadow: none;
-        border-radius: 15px;
-        width: 30px;
-        height: 30px;
-        opacity: .6;
-        outline: none;
-    }
-
-    #projectResult .close:hover {
-        background: #e74c3c;
-        opacity: .8;
-    }
-
-    #projectResult .close span {
-        display: block;
-        width: 28px;
-        height: 28px;
-        line-height: 28px;
-        font-size: 20px;
-        text-align: center;
-    }
-
-    #projectResult th {
-        vertical-align: middle;
-        text-align: center;
-        background: #f8f8f8;
-    }
-
-    #modal {
-        display: none;
-        background-color: rgba(0, 0, 0, 0.5)
-    }
-
-    .modal-header {
-        padding: 15px 15px 0 15px;
-        border: none;
-    }
-
-    .modal-body {
-        padding: 0 15px 15px 15px;
-    }
-
-    #tableKz th {
-        background: #ddd;
-        margin-top: 20px;
-    }
-
-    .form-inline .form-group {
-        margin-right: 20px;
-    }
-
-    .area {
-        border-bottom: 1px solid #ddd;
-        font-family: verdana;
-    }
-
-    td.elementScheme div {
-        position: relative;
-    }
-
-    td.elementScheme > div::before {
-        content: "";
-        position: absolute;
-        display: block;
-        width: 71px;
-        height: 25px;
-        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="2" height="30.11" viewBox="0 0 2 30.11"><rect width="2" height="30.11"/><polygon points="2 0 0 0 0 30.11 2 30.11 2 0 2 0"/></svg>') no-repeat 36px 0;
-        top: -22px;
-    }
-
-    tr:first-child td.elementScheme div::before {
-        background: none;
-    }
-
-    .resistanceData {
-        position: absolute !Important;
-    }
-
-    .resistanceData span {
-        position: relative;
-        left: 55px;
-        font-family: arial;
-    }
-
-    .energySystemImg .resistanceData span {
-        top: 40px;
-    }
-
-    .hookupImg .resistanceData span {
-        top: 30px;
-    }
-
-    .row svg {
-        display: block;
-    }
-
-    .reportTitle {
-        text-align: center;
-        font-family: arial;
-    }
-
-    .reportTitle span {
-        min-height: 100%;
-        display: table-cell;
-        margin: auto 0;
-    }
-
-    .reportTitle > span {
-        padding-right: 10px;
-    }
-
-    .area {
-        padding-bottom: 15px;
-    }
-
-    .mb1 {
-        margin-bottom: 15px;
-    }
-
-    .mt1 {
-        margin-top: 15px;
-    }
-
-    .img-responsive svg {
-        display: block;
-        max-width: 100%;
-        height: auto;
-        margin-bottom: 20px;
-    }
-
-    .w1 {
-        width: 80px !Important;
-    }
-
-    .w2 {
-        width: 280px !Important;
-    }
-
-    .pointKzWrapper {
-        position: absolute !Important;
-        top: 67px;
-        left: 18px;
-    }
-
-    .pointKzWrapper span {
-        position: absolute !Important;
-        top: 0;
-        left: -22px;
-    }
-
-    #projectResult .pointKzWrapper {
-        left: 30px;
-    }
-
-    #dataFileBlock {
-        display: none;
-    }
-
-</style>
 </body>
 </html>
