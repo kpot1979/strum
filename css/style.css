@@ -1,0 +1,171 @@
+    body {
+        margin-top: 50px;
+    }
+
+    #projectResult {
+        padding-bottom: 25px;
+    }
+
+    #projectResult .close {
+        position: fixed;
+        right: 15px;
+        top: 65px;
+        background: #fff;
+        border: 1px solid #000;
+        text-shadow: none;
+        border-radius: 15px;
+        width: 30px;
+        height: 30px;
+        opacity: .6;
+        outline: none;
+    }
+
+    #projectResult .close:hover {
+        background: #e74c3c;
+        opacity: .8;
+    }
+
+    #projectResult .close span {
+        display: block;
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        font-size: 20px;
+        text-align: center;
+    }
+
+    #projectResult th {
+        vertical-align: middle;
+        text-align: center;
+        background: #f8f8f8;
+    }
+
+    #modal {
+        display: none;
+        background-color: rgba(0, 0, 0, 0.5)
+    }
+
+    .modal-header {
+        padding: 15px 15px 0 15px;
+        border: none;
+    }
+
+    .modal-body {
+        padding: 0 15px 15px 15px;
+    }
+
+    #tableKz th {
+        background: #ddd;
+        margin-top: 20px;
+    }
+
+    .form-inline .form-group {
+        margin-right: 20px;
+    }
+
+    .area {
+        border-bottom: 1px solid #ddd;
+        font-family: verdana;
+    }
+
+    td.elementScheme div {
+        position: relative;
+    }
+
+    td.elementScheme > div::before {
+        content: "";
+        position: absolute;
+        display: block;
+        width: 71px;
+        height: 25px;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="2" height="30.11" viewBox="0 0 2 30.11"><rect width="2" height="30.11"/><polygon points="2 0 0 0 0 30.11 2 30.11 2 0 2 0"/></svg>') no-repeat 36px 0;
+        top: -22px;
+    }
+
+    tr:first-child td.elementScheme div::before {
+        background: none;
+    }
+
+    .resistanceData {
+        position: absolute !Important;
+    }
+
+    .resistanceData span {
+        position: relative;
+        left: 55px;
+        font-family: arial;
+    }
+
+    .energySystemImg .resistanceData span {
+        top: 40px;
+    }
+
+    .hookupImg .resistanceData span {
+        top: 30px;
+    }
+
+    .row svg {
+        display: block;
+    }
+
+    .reportTitle {
+        text-align: center;
+        font-family: arial;
+    }
+
+    .reportTitle span {
+        min-height: 100%;
+        display: table-cell;
+        margin: auto 0;
+    }
+
+    .reportTitle > span {
+        padding-right: 10px;
+    }
+
+    .area {
+        padding-bottom: 15px;
+    }
+
+    .mb1 {
+        margin-bottom: 15px;
+    }
+
+    .mt1 {
+        margin-top: 15px;
+    }
+
+    .img-responsive svg {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 20px;
+    }
+
+    .w1 {
+        width: 80px !Important;
+    }
+
+    .w2 {
+        width: 280px !Important;
+    }
+
+    .pointKzWrapper {
+        position: absolute !Important;
+        top: 67px;
+        left: 18px;
+    }
+
+    .pointKzWrapper span {
+        position: absolute !Important;
+        top: 0;
+        left: -22px;
+    }
+
+    #projectResult .pointKzWrapper {
+        left: 30px;
+    }
+
+    #dataFileBlock {
+        display: none;
+    }
