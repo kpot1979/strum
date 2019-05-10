@@ -635,9 +635,19 @@
                         Z2ng : bazis * Z2ng/j,
                         Z0ng : bazis * Z0ng/j
                     }
-                console.log(cur);
-                console.log(koef);
-                console.log(resist);
+                schemaObj.resistance[rowId].cur = cur; 
+                schemaObj.resistance[rowId].bazis = bazis; 
+                schemaObj.resistance[rowId].EngRel = Eng/j; 
+                schemaObj.resistance[rowId].Z1ngRel = Z1ng/j; 
+                schemaObj.resistance[rowId].Z2ngRel = Z2ng/j; 
+                schemaObj.resistance[rowId].Z0ngRel = Z0ng/j; 
+                schemaObj.resistance[rowId].Eng = resist.Eng; 
+                schemaObj.resistance[rowId].Z1ng = resist.Z1ng; 
+                schemaObj.resistance[rowId].Z2ng = resist.Z2ng; 
+                schemaObj.resistance[rowId].Z0ng = resist.Z0ng;    
+                // console.log(cur);
+                // console.log(koef);
+                console.log(schemaObj);
                 }   
             }
 
@@ -662,24 +672,39 @@
                 insert = false;
             }
             let html = '<span>';
-            if (schemaObj.resistance[rowId].r !== null) {
-                if (schemaObj.resistance[rowId].r !== 0) {
-                    html += 'R<sub>' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].r) + ' мОм<br>';
+            if (schemaObj.elements[rowId].key == 'complex') {
+                 if (!isNaN(schemaObj.resistance[rowId].Eng)) {
+                    html += 'E&Prime;<sub>нг</sub>=' + customRound(schemaObj.resistance[rowId].Eng) + ' В<br>';
                 }
-            }
-            if (schemaObj.resistance[rowId].x !== null) {
-                if (schemaObj.resistance[rowId].x !== 0) {
-                    html += 'X<sub>' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].x) + ' мОм<br>';
+                if (!isNaN(schemaObj.resistance[rowId].Z1ng)) {
+                    html += 'Z<sub>1нг</sub>=' + customRound(schemaObj.resistance[rowId].Z1ng) + ' мОм<br>';
                 }
-            }
-            if (schemaObj.resistance[rowId].r0 !== null) {
-                if (schemaObj.resistance[rowId].r0 !== 0) {
-                    html += 'R<sub>0' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].r0) + ' мОм<br>';
+                if (!isNaN(schemaObj.resistance[rowId].Z2ng)) {
+                    html += 'Z<sub>2нг</sub>=' + customRound(schemaObj.resistance[rowId].Z2ng) + ' мОм<br>';
                 }
-            }
-            if (schemaObj.resistance[rowId].x0 !== null) {
-                if (schemaObj.resistance[rowId].x0 !== 0) {
-                    html += 'X<sub>0' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].x0) + ' мОм';
+                if (!isNaN(schemaObj.resistance[rowId].Z0ng)) {
+                    html += 'Z<sub>0нг</sub>=' + customRound(schemaObj.resistance[rowId].Z0ng) + ' мОм<br>';
+                }
+            } else {
+                if (schemaObj.resistance[rowId].r !== null) {
+                    if (schemaObj.resistance[rowId].r !== 0) {
+                        html += 'R<sub>' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].r) + ' мОм<br>';
+                    }
+                }
+                if (schemaObj.resistance[rowId].x !== null) {
+                    if (schemaObj.resistance[rowId].x !== 0) {
+                        html += 'X<sub>' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].x) + ' мОм<br>';
+                    }
+                }
+                if (schemaObj.resistance[rowId].r0 !== null) {
+                    if (schemaObj.resistance[rowId].r0 !== 0) {
+                        html += 'R<sub>0' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].r0) + ' мОм<br>';
+                    }
+                }
+                if (schemaObj.resistance[rowId].x0 !== null) {
+                    if (schemaObj.resistance[rowId].x0 !== 0) {
+                        html += 'X<sub>0' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].x0) + ' мОм';
+                    }
                 }
             }
             html += '</span>';
@@ -689,6 +714,7 @@
             } else {
                 return html;
             }
+            console.log(schemaObj);
         }
 
         function convertingData(data) {
