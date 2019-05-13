@@ -14,6 +14,7 @@
             elements: {},
             templates: {},
             resistance: {},
+            resistanceStatus: {},
             kzId: {},
             calc: {},
             defaultVar: {
@@ -21,7 +22,7 @@
                 uvn: 6.3,
                 ikz: "",
                 arcResistance: 5,
-                cosPphi: 0.8
+                complexCosPphi: 0.8
             }
         };
 
@@ -80,7 +81,7 @@
 
         var complexTemplate = [
             new InitTemplateItem('select', 'complexSelector', 'form-control w2', null, null, '<i>Состав потребителей </i> = ', 'changeElementComplex', '<div class=\"form-group\">', '</div>', '', 'complexArray'),
-            new InitTemplateItem('input', 'complexCosF', 'form-control w1', schemaObj.defaultVar.cosPphi, null, '<i>cos&phi; </i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
+            new InitTemplateItem('input', 'complexCosF', 'form-control w1', schemaObj.defaultVar.complexCosPphi, null, '<i>cos&phi; </i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
         ];
 
         var energySystemResistance = {r: null, x: null, r0: null, x0: null};
@@ -92,8 +93,7 @@
         var ttResistance = {r: null, x: null, r0: null, x0: null};
         var avtomatResistance = {r: null, x: null, r0: null, x0: null};
         var uniqueResistance = {r: null, x: null, r0: null, x0: null};
-        var complexResistance = {r: null, x: null, r0: null, x0: null};
-
+        var complexResistance = {current: null, bazis: null, EngRel: null, Z1ngRel: null, Z2ngRel: null, Z0ngRel: null, Eng: null, Z1ng: null, Z2ng: null, Z0ng: null};
 
         var energySystemObj = new ElementsDataObj('energySystem', 'Энергосистема', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
         var transformatorObj = new ElementsDataObj('transformator', 'Трансформатор', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
@@ -343,6 +343,7 @@
             delete schemaObj.elements[rowId];
             delete schemaObj.templates[rowId];
             delete schemaObj.resistance[rowId];
+            delete schemaObj.resistanceStatus[rowId];
             delete schemaObj.kzId[rowId];
             delete schemaObj.calc[rowId];
             //console.log(schemaObj);
@@ -362,6 +363,7 @@
                     schemaObj.elements[rowId] = iterationCopy(elementObj[elementSelect]);
                     schemaObj.templates[rowId] = prepareTemplate(templateObj[elementSelect]);
                     schemaObj.resistance[rowId] = iterationCopy(resistanceObj[elementSelect]);
+                    schemaObj.resistanceStatus[rowId] = false;
                     html += "<tr id='row" + rowId + "'>";
                     html += "   <td id='elementSelect" + rowId + "'>";
                     html += "       <div class='form-inline'>";
@@ -401,6 +403,7 @@
                 }
                 schemaObj.templates[rowId][templateArrayKey].valueItem = data;
                 element.value = data;
+                element.setAttribute('value', data);
             }
             schemaObj.templates[rowId][templateArrayKey].textItem = elementText;
             calcResistance(rowId);
@@ -434,22 +437,30 @@
         function calcResistance(rowId) {
             let element = schemaObj.elements[rowId];
             let template = schemaObj.templates[rowId];
+            let resistance;
             if (element.key == 'energySystem') {
-                calcResistanceEnergySystem(rowId, template);
+                resistance = calcResistanceEnergySystem(rowId, template);
             } else if (element.key == 'transformator') {
-                calcResistanceTransformator(rowId, template);
+                resistance = calcResistanceTransformator(rowId, template);
             } else if (element.key == 'kabelVn' || element.key == 'kabelNn') {
-                calcResistanceKabel(rowId, template, element.key);
+                resistance = calcResistanceKabel(rowId, template, element.key);
             } else if (element.key == 'shinoprovod') {
-                calcResistanceShinoprovod(rowId, template);
+                resistance = calcResistanceShinoprovod(rowId, template);
             } else if (element.key == 'hookup') {
-                calcResistanceHookup(rowId, template);
+                resistance = calcResistanceHookup(rowId, template);
             } else if (element.key == 'tt' || element.key == 'avtomat') {
-                calcResistanceTt(rowId, template);
+                resistance = calcResistanceTt(rowId, template);
             } else if (element.key == 'unique') {
-                calcResistanceUnique(rowId, template);
+                resistance = calcResistanceUnique(rowId, template);
             } else if (element.key == 'complex') {
-                calcResistanceComplex(rowId, template);
+                resistance = calcResistanceComplex(rowId, template);
+            }
+            if (element.key != 'complex') {
+                schemaObj.resistance[rowId].r = resistance[0]; //r
+                schemaObj.resistance[rowId].x = resistance[1];  //x
+                schemaObj.resistance[rowId].r0 = resistance[2]; //r0
+                schemaObj.resistance[rowId].x0 = resistance[3]; //x0
+                schemaObj.resistanceStatus[rowId] = true;
             }
         }
 
@@ -468,10 +479,7 @@
                 r0 = 0;
                 x0 = 0;
             }
-            schemaObj.resistance[rowId].r = r;
-            schemaObj.resistance[rowId].x = x;
-            schemaObj.resistance[rowId].r0 = r0;
-            schemaObj.resistance[rowId].x0 = x0;         
+            return [r,x,r0,x0];      
         }
 
         function calcResistanceTransformator(rowId, template) {
@@ -484,10 +492,7 @@
                 r0 = value[2] * 1;
                 x0 = value[3] * 1;
             }
-            schemaObj.resistance[rowId].r = r;
-            schemaObj.resistance[rowId].x = x;
-            schemaObj.resistance[rowId].r0 = r0;
-            schemaObj.resistance[rowId].x0 = x0;
+            return [r,x,r0,x0];
         }
 
         function calcResistanceKabel(rowId, template, elementKey) {
@@ -510,10 +515,7 @@
                 r0 = kabelResist[2];
                 x0 = kabelResist[3];
             }
-            schemaObj.resistance[rowId].r = r;
-            schemaObj.resistance[rowId].x = x;
-            schemaObj.resistance[rowId].r0 = r0;
-            schemaObj.resistance[rowId].x0 = x0;
+            return [r,x,r0,x0];
         }
 
         function calcResistanceShinoprovod(rowId, template) {
@@ -527,10 +529,7 @@
                 r0 = (value[0] * length) + (3 * value[2] * length);
                 x0 = (value[1] * length) + (3 * value[3] * length);
             }
-            schemaObj.resistance[rowId].r = r;
-            schemaObj.resistance[rowId].x = x;
-            schemaObj.resistance[rowId].r0 = r0;
-            schemaObj.resistance[rowId].x0 = x0;
+            return [r,x,r0,x0];
         }
 
         function calcResistanceHookup(rowId, template) {
@@ -544,10 +543,7 @@
                 r0 = value[2] * quantity;
                 x0 = 0;
             }
-            schemaObj.resistance[rowId].r = r;
-            schemaObj.resistance[rowId].x = x;
-            schemaObj.resistance[rowId].r0 = r0;
-            schemaObj.resistance[rowId].x0 = x0;
+            return [r,x,r0,x0];
         }
 
         function calcResistanceTt(rowId, template) {
@@ -561,10 +557,7 @@
                 r0 = value[2] * quantity;
                 x0 = value[3] * quantity;
             }
-            schemaObj.resistance[rowId].r = r;
-            schemaObj.resistance[rowId].x = x;
-            schemaObj.resistance[rowId].r0 = r0;
-            schemaObj.resistance[rowId].x0 = x0;
+            return [r,x,r0,x0];
         }
 
         function calcResistanceUnique(rowId, template) {
@@ -573,10 +566,7 @@
             x = template[1].valueItem * 1;
             r0 = template[2].valueItem * 1;
             x0 = template[3].valueItem * 1;
-            schemaObj.resistance[rowId].r = r;
-            schemaObj.resistance[rowId].x = x;
-            schemaObj.resistance[rowId].r0 = r0;
-            schemaObj.resistance[rowId].x0 = x0;
+            return [r,x,r0,x0];
         }
 
         function calcResistanceComplex(rowId, template) {
@@ -584,71 +574,77 @@
                 let cosF = template[1].valueItem;
                 let power = [];
                 let powerVal = [];
+                
                 for (let i = 2; i < template.length; i++) {
                     let type = template[i].idItem.split('_');
+                    let status = true;
+                    if (template[i].valueItem == '' || template[i].valueItem == null) {
+                        status = false
+                    }
                     power.push({
                         type: type[0],
                         value: template[i].valueItem,
+                        id : template[i].idItem,
+                        valueStatus: status
                     });
                     powerVal.push(template[i].valueItem);
                 }
-                let powerSum = powerVal.reduce(function (sum, current) {
-                    return +sum + +current;
-                }, 0);
+                if (isValueInObj(power, false, 'valueStatus') == true) {
+                    let powerSum = powerVal.reduce(function (sum, current) {
+                        return +sum + +current;
+                    }, 0);
 
-                let resPower = power.map(function (item) {
-                    let resPower = item.value / powerSum;
-                    let data = eval(element);
-                    let Eng = data.Eng[item.type];
-                    let Z1ng = data.Z1ng[item.type];
-                    let Z2ng = data.Z2ng[item.type];
-                    let Z0ng = data.Z0ng[item.type];
-                    let result = [resPower, Eng, Z1ng, Z2ng, Z0ng];
-                    //return data;
-                    return result;
-                });
+                    let resPower = power.map(function (item) {
+                        let resPower = item.value / powerSum;
+                        let data = eval(element);
+                        let Eng = data.Eng[item.type];
+                        let Z1ng = data.Z1ng[item.type];
+                        let Z2ng = data.Z2ng[item.type];
+                        let Z0ng = data.Z0ng[item.type];
+                        let result = [resPower, Eng, Z1ng, Z2ng, Z0ng];
+                        return result;
+                    });
 
-                let koef = [];
-                for (let j = 0; j < resPower.length; j++) {
-                    koef.push([getKoef(resPower[j][0], resPower[j][1]), getKoef(resPower[j][0], resPower[j][2]), getKoef(resPower[j][0], resPower[j][3]), getKoef(resPower[j][0], resPower[j][4])]);
-                }
-
-                let resist = {};
-                let Eng = 0;
-                let Z1ng = 0;
-                let Z2ng = 0;
-                let Z0ng = 0;
-                if (cosF == 0) {
-                    customModal(textCosPphi);
-                } else {
-                    let cur = powerSum / (Math.sqrt(3) * cosF * schemaObj.defaultVar.unn)
-                    let bazis = (380 * 1000) / (Math.sqrt(3) * cur);
-                    for (var j = 0; j < resPower.length; j++) {
-                        Eng += getKoef(resPower[j][0], resPower[j][1]);
-                        Z1ng += getKoef(resPower[j][0], resPower[j][2]);
-                        Z2ng += getKoef(resPower[j][0], resPower[j][3]);
-                        Z0ng += getKoef(resPower[j][0], resPower[j][4]);
+                    let koef = [];
+                    for (let j = 0; j < resPower.length; j++) {
+                        koef.push([getKoef(resPower[j][0], resPower[j][1]), getKoef(resPower[j][0], resPower[j][2]), getKoef(resPower[j][0], resPower[j][3]), getKoef(resPower[j][0], resPower[j][4])]);
                     }
-                    resist = {
-                        Eng : 380 * Eng/j,
-                        Z1ng : bazis * Z1ng/j,
-                        Z2ng : bazis * Z2ng/j,
-                        Z0ng : bazis * Z0ng/j
-                    }
-                schemaObj.resistance[rowId].cur = cur; 
-                schemaObj.resistance[rowId].bazis = bazis; 
-                schemaObj.resistance[rowId].EngRel = Eng/j; 
-                schemaObj.resistance[rowId].Z1ngRel = Z1ng/j; 
-                schemaObj.resistance[rowId].Z2ngRel = Z2ng/j; 
-                schemaObj.resistance[rowId].Z0ngRel = Z0ng/j; 
-                schemaObj.resistance[rowId].Eng = resist.Eng; 
-                schemaObj.resistance[rowId].Z1ng = resist.Z1ng; 
-                schemaObj.resistance[rowId].Z2ng = resist.Z2ng; 
-                schemaObj.resistance[rowId].Z0ng = resist.Z0ng;    
-                // console.log(cur);
-                // console.log(koef);
-                console.log(schemaObj);
-                }   
+
+                    let resist = {};
+                    let Eng = 0;
+                    let Z1ng = 0;
+                    let Z2ng = 0;
+                    let Z0ng = 0;
+                    if (cosF == 0) {
+                        customModal(textCosPphi);
+                    } else {
+                        let cur = powerSum / (Math.sqrt(3) * cosF * schemaObj.defaultVar.unn)
+                        let bazis = (380 * 1000) / (Math.sqrt(3) * cur);
+                        for (var j = 0; j < resPower.length; j++) {
+                            Eng += getKoef(resPower[j][0], resPower[j][1]);
+                            Z1ng += getKoef(resPower[j][0], resPower[j][2]);
+                            Z2ng += getKoef(resPower[j][0], resPower[j][3]);
+                            Z0ng += getKoef(resPower[j][0], resPower[j][4]);
+                        }
+                        resist = {
+                            Eng : 380 * Eng/j,
+                            Z1ng : bazis * Z1ng/j,
+                            Z2ng : bazis * Z2ng/j,
+                            Z0ng : bazis * Z0ng/j
+                        }
+                        schemaObj.resistance[rowId].current = cur; 
+                        schemaObj.resistance[rowId].bazis = bazis; 
+                        schemaObj.resistance[rowId].EngRel = Eng/j; 
+                        schemaObj.resistance[rowId].Z1ngRel = Z1ng/j; 
+                        schemaObj.resistance[rowId].Z2ngRel = Z2ng/j; 
+                        schemaObj.resistance[rowId].Z0ngRel = Z0ng/j; 
+                        schemaObj.resistance[rowId].Eng = resist.Eng; 
+                        schemaObj.resistance[rowId].Z1ng = resist.Z1ng; 
+                        schemaObj.resistance[rowId].Z2ng = resist.Z2ng; 
+                        schemaObj.resistance[rowId].Z0ng = resist.Z0ng;
+                        schemaObj.resistanceStatus[rowId] = true;
+                    }  
+                } 
             }
 
         function getKoef(power, obj) {
@@ -667,41 +663,45 @@
             return result;
         }
 
+        function isValueInObj(obj, value, property) {
+            let result = false;
+            for (let key in obj) {
+                let element = obj[key];
+                if (property != undefined) {
+                    element = obj[key][property];
+                }
+                if (element == value) {
+                    return result = false;
+                } else {
+                    result = true;
+                } 
+            }
+            return result;
+        }
+
         function addResistance(rowId, insert) {
             if (insert === undefined) {
                 insert = false;
             }
             let html = '<span>';
             if (schemaObj.elements[rowId].key == 'complex') {
-                 if (!isNaN(schemaObj.resistance[rowId].Eng)) {
-                    html += 'E&Prime;<sub>нг</sub>=' + customRound(schemaObj.resistance[rowId].Eng) + ' В<br>';
-                }
-                if (!isNaN(schemaObj.resistance[rowId].Z1ng)) {
-                    html += 'Z<sub>1нг</sub>=' + customRound(schemaObj.resistance[rowId].Z1ng) + ' мОм<br>';
-                }
-                if (!isNaN(schemaObj.resistance[rowId].Z2ng)) {
-                    html += 'Z<sub>2нг</sub>=' + customRound(schemaObj.resistance[rowId].Z2ng) + ' мОм<br>';
-                }
-                if (!isNaN(schemaObj.resistance[rowId].Z0ng)) {
-                    html += 'Z<sub>0нг</sub>=' + customRound(schemaObj.resistance[rowId].Z0ng) + ' мОм<br>';
+                 if (schemaObj.resistanceStatus[rowId] != false) {
+                    html += 'E&Prime;<sub>нг</sub>=' + customRound(schemaObj.resistance[rowId].Eng, 1) + ' В<br>';
+                    html += 'Z<sub>1нг</sub>=' + customRound(schemaObj.resistance[rowId].Z1ng, 1) + ' мОм<br>';
+                    html += 'Z<sub>2нг</sub>=' + customRound(schemaObj.resistance[rowId].Z2ng, 1) + ' мОм<br>';
+                    html += 'Z<sub>0нг</sub>=' + customRound(schemaObj.resistance[rowId].Z0ng, 1) + ' мОм<br>';
                 }
             } else {
-                if (schemaObj.resistance[rowId].r !== null) {
+                if (schemaObj.resistanceStatus[rowId] != false) {
                     if (schemaObj.resistance[rowId].r !== 0) {
                         html += 'R<sub>' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].r) + ' мОм<br>';
                     }
-                }
-                if (schemaObj.resistance[rowId].x !== null) {
                     if (schemaObj.resistance[rowId].x !== 0) {
                         html += 'X<sub>' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].x) + ' мОм<br>';
                     }
-                }
-                if (schemaObj.resistance[rowId].r0 !== null) {
                     if (schemaObj.resistance[rowId].r0 !== 0) {
                         html += 'R<sub>0' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].r0) + ' мОм<br>';
                     }
-                }
-                if (schemaObj.resistance[rowId].x0 !== null) {
                     if (schemaObj.resistance[rowId].x0 !== 0) {
                         html += 'X<sub>0' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].x0) + ' мОм';
                     }
@@ -800,6 +800,7 @@
                         calc[kzIdkey] = result;
                     }
                     schemaObj.calc = calc;
+                    console.log(calc);
                     if (typeof schemaObj.calc === 'undefined' || isEmptyObject(schemaObj.calc) === 0) {
                         customModal(textAddData);
                     } else {
@@ -1461,8 +1462,11 @@
             tbody.innerHTML = html;
         }
 
-        function customRound(num) {
-            let res = +parseFloat(num).toFixed(3);
+        function customRound(num, digit) {
+            if (digit === undefined) {
+                digit = 3;
+            }
+            let res = +parseFloat(num).toFixed(digit);
             return res;
         }
 
