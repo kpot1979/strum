@@ -39,49 +39,49 @@
         }
 
         var energySystemTemplate = [
-            new InitTemplateItem('input', 'energySystemUvn', 'form-control w1', schemaObj.defaultVar.uvn, null, '<i>U</i><sub>с.ВН</sub> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' кВ', null),
-            new InitTemplateItem('input', 'energySystemUnn', 'form-control w1', schemaObj.defaultVar.unn, null, '<i>U</i><sub>с.НН</sub> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' кВ', null),
-            new InitTemplateItem('input', 'energySystemIkz', 'form-control w1', schemaObj.defaultVar.ikz, null, '<i>I</i><sub>к.ВН</sub><sup>(3)</sup> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' кА', null),
+            new InitTemplateItem('input', 'energySystemUvn', 'form-control w1', schemaObj.defaultVar.uvn, null, '<i>U</i><sub>с.ВН</sub> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' кВ', null),
+            new InitTemplateItem('input', 'energySystemUnn', 'form-control w1', schemaObj.defaultVar.unn, null, '<i>U</i><sub>с.НН</sub> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' кВ', null),
+            new InitTemplateItem('input', 'energySystemIkz', 'form-control w1', schemaObj.defaultVar.ikz, null, '<i>I</i><sub>к.ВН</sub><sup>(3)</sup> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' кА', null),
         ];
         var transformatorTemplate = [
-            new InitTemplateItem('select', 'transformator', 'form-control', null, null, '<i>Трансформатор</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'transformatorArray')
+            new InitTemplateItem('select', 'transformator', 'form-control', null, null, '<i>Трансформатор</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'transformatorArray')
         ];
         var kabelVnTemplate = [
-            new InitTemplateItem('select', 'kabelVn', 'form-control w2', null, null, '<i>Кабель</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'kabelArray'),
-            new InitTemplateItem('input', 'kabelVnLength', 'form-control w1', '1', null, '<i>Длина</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' м', null),
-            new InitTemplateItem('select', 'kabelVnQuantity', 'form-control', '1', null, '<i>Кол-во</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' шт.', 'quantityArray')
+            new InitTemplateItem('select', 'kabelVn', 'form-control w2', null, null, '<i>Кабель</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'kabelArray'),
+            new InitTemplateItem('input', 'kabelVnLength', 'form-control w1', '1', null, '<i>Длина</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' м', null),
+            new InitTemplateItem('select', 'kabelVnQuantity', 'form-control', '1', null, '<i>Кол-во</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' шт.', 'quantityArray')
         ];
         var kabelNnTemplate = [
-            new InitTemplateItem('select', 'kabelNn', 'form-control w2', null, null, '<i>Кабель</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'kabelArray'),
-            new InitTemplateItem('input', 'kabelNnLength', 'form-control w1', '1', null, '<i>Длина</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' м', null),
-            new InitTemplateItem('select', 'kabelNnQuantity', 'form-control', '1', null, '<i>Кол-во</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' шт.', 'quantityArray')
+            new InitTemplateItem('select', 'kabelNn', 'form-control w2', null, null, '<i>Кабель</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'kabelArray'),
+            new InitTemplateItem('input', 'kabelNnLength', 'form-control w1', '1', null, '<i>Длина</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' м', null),
+            new InitTemplateItem('select', 'kabelNnQuantity', 'form-control', '1', null, '<i>Кол-во</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' шт.', 'quantityArray')
         ];
         var shinoprovodTemplate = [
-            new InitTemplateItem('select', 'shinoprovod', 'form-control w2', null, null, '<i>Шинопровод</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'shinoprovodArray'),
-            new InitTemplateItem('input', 'shinoprovodLength', 'form-control w1', '1', null, '<i>Длина</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' м', null)
+            new InitTemplateItem('select', 'shinoprovod', 'form-control w2', null, null, '<i>Шинопровод</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'shinoprovodArray'),
+            new InitTemplateItem('input', 'shinoprovodLength', 'form-control w1', '1', null, '<i>Длина</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' м', null)
         ];
         var hookupTemplate = [
-            new InitTemplateItem('select', 'hookup', 'form-control w2', null, null, '<i>Контактные соединения</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'hookupArray'),
-            new InitTemplateItem('input', 'hookupQuantity', 'form-control w1', '1', null, '<i>Кол-во</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' шт.', null)
+            new InitTemplateItem('select', 'hookup', 'form-control w2', null, null, '<i>Контактные соединения</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'hookupArray'),
+            new InitTemplateItem('input', 'hookupQuantity', 'form-control w1', '1', null, '<i>Кол-во</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' шт.', null)
         ];
         var ttTemplate = [
-            new InitTemplateItem('select', 'tt', 'form-control w2', null, null, '<i>Трансформатор тока</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'ttArray'),
-            new InitTemplateItem('input', 'ttQuantity', 'form-control w1', '1', null, '<i>Кол-во</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' шт.', null)
+            new InitTemplateItem('select', 'tt', 'form-control w2', null, null, '<i>Трансформатор тока</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'ttArray'),
+            new InitTemplateItem('input', 'ttQuantity', 'form-control w1', '1', null, '<i>Кол-во</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' шт.', null)
         ];
         var avtomatTemplate = [
-            new InitTemplateItem('select', 'avtomat', 'form-control w2', null, null, '<i>Автомат </i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'avtomatArray'),
-            new InitTemplateItem('input', 'avtomatQuantity', 'form-control w1', '1', null, '<i>Кол-во</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' шт.', null)
+            new InitTemplateItem('select', 'avtomat', 'form-control w2', null, null, '<i>Автомат </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', 'avtomatArray'),
+            new InitTemplateItem('input', 'avtomatQuantity', 'form-control w1', '1', null, '<i>Кол-во</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' шт.', null)
         ];
         var uniqueTemplate = [
-            new InitTemplateItem('input', 'uniqueR', 'form-control w1', '', null, '<i>R</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' мОм', null),
-            new InitTemplateItem('input', 'uniqueX', 'form-control w1', '', null, '<i>X</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' мОм', null),
-            new InitTemplateItem('input', 'uniqueR0', 'form-control w1', '', null, '<i>R</i><sub>0</sub> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' мОм', null),
-            new InitTemplateItem('input', 'uniqueX0', 'form-control w1', '', null, '<i>X</i><sub>0</sub> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' мОм', null),
+            new InitTemplateItem('input', 'uniqueR', 'form-control w1', '', null, '<i>R</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' мОм', null),
+            new InitTemplateItem('input', 'uniqueX', 'form-control w1', '', null, '<i>X</i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' мОм', null),
+            new InitTemplateItem('input', 'uniqueR0', 'form-control w1', '', null, '<i>R</i><sub>0</sub> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' мОм', null),
+            new InitTemplateItem('input', 'uniqueX0', 'form-control w1', '', null, '<i>X</i><sub>0</sub> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' мОм', null),
         ];
 
         var complexTemplate = [
-            new InitTemplateItem('select', 'complexSelector', 'form-control w2', null, null, '<i>Состав потребителей </i> = ', 'changeElementComplex', '<div class=\"form-group\">', '</div>', '', 'complexArray'),
-            new InitTemplateItem('input', 'complexCosF', 'form-control w1', schemaObj.defaultVar.complexCosPphi, null, '<i>cos&phi; </i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
+            new InitTemplateItem('select', 'complexSelector', 'form-control w2', null, null, '<i>Состав потребителей </i> =&nbsp;', 'changeElementComplex', '<div class=\"form-group\">', '</div>', '', 'complexArray'),
+            new InitTemplateItem('input', 'complexCosF', 'form-control w1', schemaObj.defaultVar.complexCosPphi, null, '<i>cos&phi; </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
         ];
 
         var energySystemResistance = {r: null, x: null, r0: null, x0: null};
@@ -93,7 +93,18 @@
         var ttResistance = {r: null, x: null, r0: null, x0: null};
         var avtomatResistance = {r: null, x: null, r0: null, x0: null};
         var uniqueResistance = {r: null, x: null, r0: null, x0: null};
-        var complexResistance = {current: null, bazis: null, EngRel: null, Z1ngRel: null, Z2ngRel: null, Z0ngRel: null, Eng: null, Z1ng: null, Z2ng: null, Z0ng: null};
+        var complexResistance = {
+            current: null,
+            bazis: null,
+            EngRel: null,
+            Z1ngRel: null,
+            Z2ngRel: null,
+            Z0ngRel: null,
+            Eng: null,
+            Z1ng: null,
+            Z2ng: null,
+            Z0ng: null
+        };
 
         var energySystemObj = new ElementsDataObj('energySystem', 'Энергосистема', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
         var transformatorObj = new ElementsDataObj('transformator', 'Трансформатор', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
@@ -479,7 +490,7 @@
                 r0 = 0;
                 x0 = 0;
             }
-            return [r,x,r0,x0];      
+            return [r, x, r0, x0];
         }
 
         function calcResistanceTransformator(rowId, template) {
@@ -492,7 +503,7 @@
                 r0 = value[2] * 1;
                 x0 = value[3] * 1;
             }
-            return [r,x,r0,x0];
+            return [r, x, r0, x0];
         }
 
         function calcResistanceKabel(rowId, template, elementKey) {
@@ -515,7 +526,7 @@
                 r0 = kabelResist[2];
                 x0 = kabelResist[3];
             }
-            return [r,x,r0,x0];
+            return [r, x, r0, x0];
         }
 
         function calcResistanceShinoprovod(rowId, template) {
@@ -529,7 +540,7 @@
                 r0 = (value[0] * length) + (3 * value[2] * length);
                 x0 = (value[1] * length) + (3 * value[3] * length);
             }
-            return [r,x,r0,x0];
+            return [r, x, r0, x0];
         }
 
         function calcResistanceHookup(rowId, template) {
@@ -543,7 +554,7 @@
                 r0 = value[2] * quantity;
                 x0 = 0;
             }
-            return [r,x,r0,x0];
+            return [r, x, r0, x0];
         }
 
         function calcResistanceTt(rowId, template) {
@@ -557,7 +568,7 @@
                 r0 = value[2] * quantity;
                 x0 = value[3] * quantity;
             }
-            return [r,x,r0,x0];
+            return [r, x, r0, x0];
         }
 
         function calcResistanceUnique(rowId, template) {
@@ -566,86 +577,86 @@
             x = template[1].valueItem * 1;
             r0 = template[2].valueItem * 1;
             x0 = template[3].valueItem * 1;
-            return [r,x,r0,x0];
+            return [r, x, r0, x0];
         }
 
         function calcResistanceComplex(rowId, template) {
-                let element = template[0].valueItem;
-                let cosF = template[1].valueItem;
-                let power = [];
-                let powerVal = [];
-                
-                for (let i = 2; i < template.length; i++) {
-                    let type = template[i].idItem.split('_');
-                    let status = true;
-                    if (template[i].valueItem == '' || template[i].valueItem == null) {
-                        status = false
-                    }
-                    power.push({
-                        type: type[0],
-                        value: template[i].valueItem,
-                        id : template[i].idItem,
-                        valueStatus: status
-                    });
-                    powerVal.push(template[i].valueItem);
+            let element = template[0].valueItem;
+            let cosF = template[1].valueItem;
+            let power = [];
+            let powerVal = [];
+
+            for (let i = 2; i < template.length; i++) {
+                let type = template[i].idItem.split('_');
+                let status = true;
+                if (template[i].valueItem == '' || template[i].valueItem == null) {
+                    status = false
                 }
-                if (isValueInObj(power, false, 'valueStatus') == true) {
-                    let powerSum = powerVal.reduce(function (sum, current) {
-                        return +sum + +current;
-                    }, 0);
-
-                    let resPower = power.map(function (item) {
-                        let resPower = item.value / powerSum;
-                        let data = eval(element);
-                        let Eng = data.Eng[item.type];
-                        let Z1ng = data.Z1ng[item.type];
-                        let Z2ng = data.Z2ng[item.type];
-                        let Z0ng = data.Z0ng[item.type];
-                        let result = [resPower, Eng, Z1ng, Z2ng, Z0ng];
-                        return result;
-                    });
-
-                    let koef = [];
-                    for (let j = 0; j < resPower.length; j++) {
-                        koef.push([getKoef(resPower[j][0], resPower[j][1]), getKoef(resPower[j][0], resPower[j][2]), getKoef(resPower[j][0], resPower[j][3]), getKoef(resPower[j][0], resPower[j][4])]);
-                    }
-
-                    let resist = {};
-                    let Eng = 0;
-                    let Z1ng = 0;
-                    let Z2ng = 0;
-                    let Z0ng = 0;
-                    if (cosF == 0) {
-                        customModal(textCosPphi);
-                    } else {
-                        let cur = powerSum / (Math.sqrt(3) * cosF * schemaObj.defaultVar.unn)
-                        let bazis = (380 * 1000) / (Math.sqrt(3) * cur);
-                        for (var j = 0; j < resPower.length; j++) {
-                            Eng += getKoef(resPower[j][0], resPower[j][1]);
-                            Z1ng += getKoef(resPower[j][0], resPower[j][2]);
-                            Z2ng += getKoef(resPower[j][0], resPower[j][3]);
-                            Z0ng += getKoef(resPower[j][0], resPower[j][4]);
-                        }
-                        resist = {
-                            Eng : 380 * Eng/j,
-                            Z1ng : bazis * Z1ng/j,
-                            Z2ng : bazis * Z2ng/j,
-                            Z0ng : bazis * Z0ng/j
-                        }
-                        schemaObj.resistance[rowId].current = cur; 
-                        schemaObj.resistance[rowId].bazis = bazis; 
-                        schemaObj.resistance[rowId].EngRel = Eng/j; 
-                        schemaObj.resistance[rowId].Z1ngRel = Z1ng/j; 
-                        schemaObj.resistance[rowId].Z2ngRel = Z2ng/j; 
-                        schemaObj.resistance[rowId].Z0ngRel = Z0ng/j; 
-                        schemaObj.resistance[rowId].Eng = resist.Eng; 
-                        schemaObj.resistance[rowId].Z1ng = resist.Z1ng; 
-                        schemaObj.resistance[rowId].Z2ng = resist.Z2ng; 
-                        schemaObj.resistance[rowId].Z0ng = resist.Z0ng;
-                        schemaObj.resistanceStatus[rowId] = true;
-                    }  
-                } 
+                power.push({
+                    type: type[0],
+                    value: template[i].valueItem,
+                    id: template[i].idItem,
+                    valueStatus: status
+                });
+                powerVal.push(template[i].valueItem);
             }
+            if (isValueInObj(power, false, 'valueStatus') == true) {
+                let powerSum = powerVal.reduce(function (sum, current) {
+                    return +sum + +current;
+                }, 0);
+
+                let resPower = power.map(function (item) {
+                    let resPower = item.value / powerSum;
+                    let data = eval(element);
+                    let Eng = data.Eng[item.type];
+                    let Z1ng = data.Z1ng[item.type];
+                    let Z2ng = data.Z2ng[item.type];
+                    let Z0ng = data.Z0ng[item.type];
+                    let result = [resPower, Eng, Z1ng, Z2ng, Z0ng];
+                    return result;
+                });
+
+                let koef = [];
+                for (let j = 0; j < resPower.length; j++) {
+                    koef.push([getKoef(resPower[j][0], resPower[j][1]), getKoef(resPower[j][0], resPower[j][2]), getKoef(resPower[j][0], resPower[j][3]), getKoef(resPower[j][0], resPower[j][4])]);
+                }
+
+                let resist = {};
+                let Eng = 0;
+                let Z1ng = 0;
+                let Z2ng = 0;
+                let Z0ng = 0;
+                if (cosF == 0) {
+                    customModal(textCosPphi);
+                } else {
+                    let cur = powerSum / (Math.sqrt(3) * cosF * schemaObj.defaultVar.unn)
+                    let bazis = (380 * 1000) / (Math.sqrt(3) * cur);
+                    for (var j = 0; j < resPower.length; j++) {
+                        Eng += getKoef(resPower[j][0], resPower[j][1]);
+                        Z1ng += getKoef(resPower[j][0], resPower[j][2]);
+                        Z2ng += getKoef(resPower[j][0], resPower[j][3]);
+                        Z0ng += getKoef(resPower[j][0], resPower[j][4]);
+                    }
+                    resist = {
+                        Eng: 380 * Eng / j,
+                        Z1ng: bazis * Z1ng / j,
+                        Z2ng: bazis * Z2ng / j,
+                        Z0ng: bazis * Z0ng / j
+                    }
+                    schemaObj.resistance[rowId].current = cur;
+                    schemaObj.resistance[rowId].bazis = bazis;
+                    schemaObj.resistance[rowId].EngRel = Eng / j;
+                    schemaObj.resistance[rowId].Z1ngRel = Z1ng / j;
+                    schemaObj.resistance[rowId].Z2ngRel = Z2ng / j;
+                    schemaObj.resistance[rowId].Z0ngRel = Z0ng / j;
+                    schemaObj.resistance[rowId].Eng = resist.Eng;
+                    schemaObj.resistance[rowId].Z1ng = resist.Z1ng;
+                    schemaObj.resistance[rowId].Z2ng = resist.Z2ng;
+                    schemaObj.resistance[rowId].Z0ng = resist.Z0ng;
+                    schemaObj.resistanceStatus[rowId] = true;
+                }
+            }
+        }
 
         function getKoef(power, obj) {
             let result;
@@ -658,7 +669,7 @@
                     }
                 }
             } else {
-                result = 0   
+                result = 0
             }
             return result;
         }
@@ -674,7 +685,7 @@
                     return result = false;
                 } else {
                     result = true;
-                } 
+                }
             }
             return result;
         }
@@ -685,7 +696,7 @@
             }
             let html = '<span>';
             if (schemaObj.elements[rowId].key == 'complex') {
-                 if (schemaObj.resistanceStatus[rowId] != false) {
+                if (schemaObj.resistanceStatus[rowId] != false) {
                     html += 'E&Prime;<sub>нг</sub>=' + customRound(schemaObj.resistance[rowId].Eng, 1) + ' В<br>';
                     html += 'Z<sub>1нг</sub>=' + customRound(schemaObj.resistance[rowId].Z1ng, 1) + ' мОм<br>';
                     html += 'Z<sub>2нг</sub>=' + customRound(schemaObj.resistance[rowId].Z2ng, 1) + ' мОм<br>';
@@ -1547,10 +1558,8 @@
                 html += "   <div class=\"form-group\"><label for=\"" + titleArray[i] + rowId + "\"><i>" + complexTitle[titleArray[i]] + " </i> = </label>";
                 html += "       <input id=\"" + titleArray[i] + "_" + rowId + "\" onchange=\"changeElementValue(this.id, " + rowId + ")\" class=\"form-control w1\" type=\"text\" data-templatearraykey=\"" + (i + complexTemplate.length) + "\" name=\"" + titleArray[i] + rowId + "\" value=\"\"> кВт";
                 html += "   </div>";
-                //let complexTemplateLoc = new InitTemplateItem('input', titleArray[i]+rowId, 'form-control w1', '', null, '<i>' + complexTitle[titleArray[i]] +  '</i> = ', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null);
             }
             document.getElementById("complex-data").innerHTML = html;
-            //schemaObj.templates[rowId] = prepareTemplate(complexTemplate);
             console.log(schemaObj);
         }
 
@@ -1573,10 +1582,36 @@
     <div class="container-fluid">
         <div class="navbar-left">
             <span id="calcCurrentKz" onclick="tokKz();" class="btn btn-primary navbar-btn">Расчитать ток КЗ</span>
-            <span id="reportCurrentKz" onclick="report();" class="btn btn-success"><i><svg xmlns="http://www.w3.org/2000/svg" width="10.69" height="15" viewBox="0 0 10.69 15"><polygon points="6.96 0.5 0.5 0.5 0.5 14.5 10.19 14.5 10.19 3.73 6.96 0.5" fill="none" stroke="#fff"stroke-miterlimit="10"/><polyline points="10.19 3.73 6.96 3.73 6.96 0.5 6.96 3.73" fill="none"stroke="#fff" stroke-miterlimit="10"/><line x1="2.12" y1="5.88"x2="8.58" y2="5.88"fill="none"stroke="#fff"stroke-miterlimit="10"/><line x1="2.12" y1="8.04" x2="8.58" y2="8.04" fill="none" stroke="#fff" stroke-miterlimit="10"/><line x1="2.12" y1="10.19" x2="8.58" y2="10.19" fill="none" stroke="#fff" stroke-miterlimit="10"/><line x1="2.12" y1="12.35" x2="6.42" y2="12.35" fill="none" stroke="#fff"stroke-miterlimit="10"/></svg></i> Показать расчет</span> </div>
+            <span id="reportCurrentKz" onclick="report();" class="btn btn-success"><i><svg
+                    xmlns="http://www.w3.org/2000/svg" width="10.69" height="15" viewBox="0 0 10.69 15"><polygon
+                    points="6.96 0.5 0.5 0.5 0.5 14.5 10.19 14.5 10.19 3.73 6.96 0.5" fill="none" stroke="#fff"
+                    stroke-miterlimit="10"/><polyline points="10.19 3.73 6.96 3.73 6.96 0.5 6.96 3.73" fill="none"
+                    stroke="#fff" stroke-miterlimit="10"/><line x1="2.12" y1="5.88"
+                    x2="8.58" y2="5.88"
+                    fill="none"
+                    stroke="#fff"
+                    stroke-miterlimit="10"/><line
+                    x1="2.12" y1="8.04" x2="8.58" y2="8.04" fill="none" stroke="#fff" stroke-miterlimit="10"/><line
+                    x1="2.12" y1="10.19" x2="8.58" y2="10.19" fill="none" stroke="#fff" stroke-miterlimit="10"/><line
+                    x1="2.12" y1="12.35" x2="6.42" y2="12.35" fill="none" stroke="#fff"
+                    stroke-miterlimit="10"/></svg></i> Показать расчет</span></div>
         <div class="navbar-right"></div>
         <div class="navbar-right">
-            <span id="saveFileScheme" onclick="saveFileScheme();" class="btn btn-default navbar-btn"><i><svg xmlns="http://www.w3.org/2000/svg" width="13.8" height="14.04"><path fill="#010002"d="M10.78 0H3.19L0 2.85v11.19h7.59v-1H1.13V3.95H4.4V1h5.24v3.11h1.14V0z"/><path d="M13.78 10.13a.19.19 0 0 0-.17-.12h-2.07V5.44a.18.18 0 0 0-.19-.18h-3a.18.18 0 0 0-.19.18V10H6.08a.2.2 0 0 0-.18.12.19.19 0 0 0 0 .2L9.7 14a.24.24 0 0 0 .14 0 .21.21 0 0 0 .16 0l3.77-3.66a.19.19 0 0 0 .01-.21z"/></svg></i> Сохранить проект в файл</span> <span id="loadFileScheme" onclick="loadFileScheme();" class="btn btn-default navbar-btn"><i><svg xmlns="http://www.w3.org/2000/svg" width="13.8" height="14.04"><path fill="#010002"d="M10.78 0H3.19L0 2.85v11.19h7.59v-1H1.13V3.95H4.4V1h5.24v3.11h1.14V0z"/><path d="M5.9 9.17a.19.19 0 0 0 .18.11h2.06v4.58a.19.19 0 0 0 .19.18h3a.18.18 0 0 0 .18-.18V9.28h2.08a.18.18 0 0 0 .15-.28L10 5.31a.19.19 0 0 0-.13 0 .24.24 0 0 0-.14 0L5.94 9a.18.18 0 0 0-.04.17z"/></svg></i> Загрузить проект из файла</span> <span id="saveLocalScheme" onclick="saveLocalScheme();" class="btn btn-default navbar-btn"><i><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14"><path d="M3.5,12.83h7V9.33h-7Zm8.17,0h1.17V4.67a1,1,0,0,0-.09-.35A1,1,0,0,0,12.56,4L10,1.44a1,1,0,0,0-.31-.18,1,1,0,0,0-.36-.09V5a.87.87,0,0,1-.87.88H3.21A.87.87,0,0,1,2.33,5V1.17H1.17V12.83H2.33V9a.87.87,0,0,1,.88-.87h7.58a.87.87,0,0,1,.88.88ZM8.17,4.38V1.46a.3.3,0,0,0-.29-.29H6.13a.3.3,0,0,0-.29.29V4.38a.3.3,0,0,0,.29.29H7.88a.3.3,0,0,0,.29-.29ZM14,4.67v8.46a.87.87,0,0,1-.87.88H.88a.84.84,0,0,1-.62-.26A.84.84,0,0,1,0,13.13V.88A.84.84,0,0,1,.26.26.84.84,0,0,1,.88,0H9.33a2.1,2.1,0,0,1,.8.18,2.12,2.12,0,0,1,.69.44l2.55,2.55a2.12,2.12,0,0,1,.44.69A2.1,2.1,0,0,1,14,4.67Z"/></svg></i> Сохранить проект</span> <span id="loadLocalScheme" onclick="loadLocalScheme();" class="btn btn-default navbar-btn"><i><svg xmlns="http://www.w3.org/2000/svg" width="18.6" height="14" viewBox="0 0 18.6 14"><path d="M14,4.67a4.67,4.67,0,1,0-9.33,0A4.67,4.67,0,0,0,0,9.49,4.81,4.81,0,0,0,4.9,14H7a.73.73,0,0,0,.78-.78V10.89H6.85A.78.78,0,0,1,6.3,9.57L8.79,7.08a.75.75,0,0,1,1.09,0l2.49,2.49a.78.78,0,0,1-.54,1.32h-.93v2.33a.73.73,0,0,0,.78.78h2.1a4.69,4.69,0,0,0,4.82-4.51A4.56,4.56,0,0,0,14,4.67Z"/></svg></i> Загрузить проект</span> </div>
+            <span id="saveFileScheme" onclick="saveFileScheme();" class="btn btn-default navbar-btn"><i><svg
+                    xmlns="http://www.w3.org/2000/svg" width="13.8" height="14.04"><path fill="#010002"
+                    d="M10.78 0H3.19L0 2.85v11.19h7.59v-1H1.13V3.95H4.4V1h5.24v3.11h1.14V0z"/><path
+                    d="M13.78 10.13a.19.19 0 0 0-.17-.12h-2.07V5.44a.18.18 0 0 0-.19-.18h-3a.18.18 0 0 0-.19.18V10H6.08a.2.2 0 0 0-.18.12.19.19 0 0 0 0 .2L9.7 14a.24.24 0 0 0 .14 0 .21.21 0 0 0 .16 0l3.77-3.66a.19.19 0 0 0 .01-.21z"/></svg></i> Сохранить проект в файл</span>
+            <span id="loadFileScheme" onclick="loadFileScheme();" class="btn btn-default navbar-btn"><i><svg
+                    xmlns="http://www.w3.org/2000/svg" width="13.8" height="14.04"><path fill="#010002"
+                    d="M10.78 0H3.19L0 2.85v11.19h7.59v-1H1.13V3.95H4.4V1h5.24v3.11h1.14V0z"/><path
+                    d="M5.9 9.17a.19.19 0 0 0 .18.11h2.06v4.58a.19.19 0 0 0 .19.18h3a.18.18 0 0 0 .18-.18V9.28h2.08a.18.18 0 0 0 .15-.28L10 5.31a.19.19 0 0 0-.13 0 .24.24 0 0 0-.14 0L5.94 9a.18.18 0 0 0-.04.17z"/></svg></i> Загрузить проект из файла</span>
+            <span id="saveLocalScheme" onclick="saveLocalScheme();" class="btn btn-default navbar-btn"><i><svg
+                    xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14"><path
+                    d="M3.5,12.83h7V9.33h-7Zm8.17,0h1.17V4.67a1,1,0,0,0-.09-.35A1,1,0,0,0,12.56,4L10,1.44a1,1,0,0,0-.31-.18,1,1,0,0,0-.36-.09V5a.87.87,0,0,1-.87.88H3.21A.87.87,0,0,1,2.33,5V1.17H1.17V12.83H2.33V9a.87.87,0,0,1,.88-.87h7.58a.87.87,0,0,1,.88.88ZM8.17,4.38V1.46a.3.3,0,0,0-.29-.29H6.13a.3.3,0,0,0-.29.29V4.38a.3.3,0,0,0,.29.29H7.88a.3.3,0,0,0,.29-.29ZM14,4.67v8.46a.87.87,0,0,1-.87.88H.88a.84.84,0,0,1-.62-.26A.84.84,0,0,1,0,13.13V.88A.84.84,0,0,1,.26.26.84.84,0,0,1,.88,0H9.33a2.1,2.1,0,0,1,.8.18,2.12,2.12,0,0,1,.69.44l2.55,2.55a2.12,2.12,0,0,1,.44.69A2.1,2.1,0,0,1,14,4.67Z"/></svg></i> Сохранить проект</span>
+            <span id="loadLocalScheme" onclick="loadLocalScheme();" class="btn btn-default navbar-btn"><i><svg
+                    xmlns="http://www.w3.org/2000/svg" width="18.6" height="14" viewBox="0 0 18.6 14"><path
+                    d="M14,4.67a4.67,4.67,0,1,0-9.33,0A4.67,4.67,0,0,0,0,9.49,4.81,4.81,0,0,0,4.9,14H7a.73.73,0,0,0,.78-.78V10.89H6.85A.78.78,0,0,1,6.3,9.57L8.79,7.08a.75.75,0,0,1,1.09,0l2.49,2.49a.78.78,0,0,1-.54,1.32h-.93v2.33a.73.73,0,0,0,.78.78h2.1a4.69,4.69,0,0,0,4.82-4.51A4.56,4.56,0,0,0,14,4.67Z"/></svg></i> Загрузить проект</span>
+        </div>
 
     </div>
 </nav>
@@ -1596,7 +1631,7 @@
                         </div>
                         <div class="form-group">
                             <input name="arcInput" class="form-control w1" id="arcInput" type="text" value=""
-                                   autocomplete="off"> мОм
+                                    autocomplete="off"> мОм
                         </div>
                     </div>
                     <table id="tableKz" class="table">
@@ -1626,7 +1661,7 @@
                             </td>
                             <td class="rowAddDel">
                                 <input type="button" class="add btn btn-success" onclick="addRow();"
-                                       value="Добавить">
+                                        value="Добавить">
                             </td>
                         </tr>
                         </tbody>
