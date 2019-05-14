@@ -345,15 +345,17 @@
         }
 
         function renderItemPointKz(element, rowId, pointKz) {
-            if (pointKz === undefined) {
-                pointKz = null;
-            }
             let html = '';
             let checked = '';
-            if (pointKz !== null) {
-                checked = 'checked';
+            if (element != 'complex' && element != 'energySystem') {
+                if (pointKz === undefined) {
+                    pointKz = null;
+                }
+                if (pointKz !== null) {
+                    checked = 'checked';
+                }
+                html += '<input id=\"' + element + 'Checkbox' + rowId + '\" type=\"checkbox\" onchange=\"changeCheckbox(this.id, ' + rowId + ')\" name=\"' + element + 'Checkbox[' + rowId + ']\" ' + checked + '>';
             }
-            html += '<input id=\"' + element + 'Checkbox' + rowId + '\" type=\"checkbox\" onchange=\"changeCheckbox(this.id, ' + rowId + ')\" name=\"' + element + 'Checkbox[' + rowId + ']\" ' + checked + '>';
             return html;
         }
 
@@ -686,7 +688,7 @@
                     }
                 }
             } else {
-                result = 0
+                result = 0;
             }
             return result;
         }
@@ -829,7 +831,6 @@
                         calc[kzIdkey] = result;
                     }
                     schemaObj.calc = calc;
-                    // console.log(error);
                     // console.log(schemaObj);
                     reportTokKz(error);
                 }
@@ -891,7 +892,7 @@
                     string += "</tbody></table>";
                     result(string);
                 }
-            } /////
+            } 
         }
 
         function reportEnergySystem(rowId) {
