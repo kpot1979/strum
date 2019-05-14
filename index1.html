@@ -843,7 +843,7 @@
                 customModal(textAddData);
             } else {
                 if (error.length > 0) {
-                    customModal("На участках " + error.join(', ') + " не определены сопротивления");
+                    customModal(textResistanceIsNotDefined, error.join(', '));
                 } else {
                     string += "<h3>Результаты расчета токов КЗ</h3>";
                     string += "<table class=\"table table-bordered text-center\">";
