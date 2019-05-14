@@ -106,16 +106,16 @@
             Z0ng: null
         };
 
-        var energySystemObj = new ElementsDataObj('energySystem', 'Энергосистема', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
-        var transformatorObj = new ElementsDataObj('transformator', 'Трансформатор', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
-        var kabelVnObj = new ElementsDataObj('kabelVn', 'Кабельная линия ВН', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
-        var kabelNnObj = new ElementsDataObj('kabelNn', 'Кабельная линия НН', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
-        var shinoprovodObj = new ElementsDataObj('shinoprovod', 'Шинопровод', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
-        var hookupObj = new ElementsDataObj('hookup', 'Контактные соединения', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
-        var ttObj = new ElementsDataObj('tt', 'Трансформатор тока', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
-        var avtomatObj = new ElementsDataObj('avtomat', 'Автоматический выключатель', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
-        var uniqueObj = new ElementsDataObj('unique', 'Свой элемент', null, null, null, '<div class=\"form-inline\">{tpl}</div>');
-        var complexObj = new ElementsDataObj('complex', 'Комплексная нагрузка', null, null, null, '<div class=\"form-inline\">{tpl}</div><div id=\"complex-data\" class=\"form-inline\">{tpl}</div>');
+        var energySystemObj = new ElementsDataObj('energySystem', 'Энергосистема', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
+        var transformatorObj = new ElementsDataObj('transformator', 'Трансформатор', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
+        var kabelVnObj = new ElementsDataObj('kabelVn', 'Кабельная линия ВН', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
+        var kabelNnObj = new ElementsDataObj('kabelNn', 'Кабельная линия НН', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
+        var shinoprovodObj = new ElementsDataObj('shinoprovod', 'Шинопровод', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
+        var hookupObj = new ElementsDataObj('hookup', 'Контактные соединения', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
+        var ttObj = new ElementsDataObj('tt', 'Трансформатор тока', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
+        var avtomatObj = new ElementsDataObj('avtomat', 'Автоматический выключатель', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
+        var uniqueObj = new ElementsDataObj('unique', 'Свой элемент', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
+        var complexObj = new ElementsDataObj('complex', 'Комплексная нагрузка', null, null, null, '<div class=\"form-inline\">{tpl}</div>', 2, 'complex-data');
 
 
         var elementObj = {
@@ -166,8 +166,9 @@
         var textProjectSaved = '<p class=\"text-success\">Спасибо, ваш проект сохранен!</p>';
         var textProjectSendSaved = '<p class=\"text-success\">Спасибо, ваш проект сохранен в файл. Если он не загрузился автоматически, то нажмите кнопку \"Сохранить\" в диалоговом окне.</p>';
         var textSaveFileError = '<p class=\"text-danger\">Ошибка при сохранении проекта в файл!</p>';
-        var textLastEl = '<p class=\"text-danger\">Предыдущий элемент должен быть последним в схеме!</p>';
+        var textLastEl = '<p class=\"text-danger\">Элемент \"{var}\" должен быть последним в схеме!</p>';
         var textCosPphi = '<p class=\"text-danger\">Введите значение cos&phi;!</p>';
+        var textResistanceIsNotDefined = '<p class=\"text-danger\">На участках {var} не определены сопротивления!</p>';
 
         window.onload = function () {
             var elementSelect = document.getElementById("elementSelect");
@@ -188,13 +189,15 @@
             });
         }
 
-        function ElementsDataObj(key, name, title, rowId, pointKz, tplWrp) {
+        function ElementsDataObj(key, name, title, rowId, pointKz, tplWrp, divider, dividerInsId) {
             this.key = key;
             this.name = name;
             this.title = title;
             this.rowId = rowId;
             this.pointKz = pointKz;
             this.tplWrp = htmlEncode(tplWrp);
+            this.divider = divider;
+            this.dividerInsId = dividerInsId;
         }
 
         function InitTemplateItem(typeItem, idItem, classItem, valueItem, textItem, labelItem, functionItem, wrapperItemStart, wrapperItemEnd, suffixItem, outerData) {
@@ -254,13 +257,23 @@
             }
             let html = '';
             let tplWrp = schemaObj.elements[rowId].tplWrp;
+            let divider = schemaObj.elements[rowId].divider;
+            let dividerInsId = schemaObj.elements[rowId].dividerInsId;
             if (tplWrp !== null) {
                 tplWrp = tplWrp.split('{tpl}');
             } else {
                 tplWrp = ['', '']
-            }
+            }            
             html += htmlDecode(tplWrp[0]);
             for (let i = 0; i < template.length; i++) {
+                if (i == divider) {
+                    html += htmlDecode(tplWrp[1]);
+                    if (dividerInsId != null) {
+                        html += htmlDecode(tplWrp[0].replace('&gt;', 'id=\"'+dividerInsId+'\"&gt;'));
+                    }else {
+                        html += htmlDecode(tplWrp[0]);
+                    }
+                }
                 let functionItem = '';
                 if (template[i].functionItem !== null) {
                     functionItem = 'onchange=\"' + template[i].functionItem + '(this.id, ' + rowId + ')\"';
@@ -284,6 +297,9 @@
                 }
             }
             html += htmlDecode(tplWrp[1]);
+            if (dividerInsId != null && template.length <= divider) {
+                html += '<div id=\"'+dividerInsId+'\" class=\"form-inline\"></div>';
+            }
             return html;
         }
 
@@ -365,7 +381,8 @@
             if (elementSelect != '') {
                 let lastElement = lastElementObj(schemaObj.elements);
                 if (lastElement && lastElement.key == 'complex') {
-                    customModal(textLastEl);
+                    console.log(schemaObj);
+                    customModal(textLastEl, lastElement.name);
                 } else {
                     let html = "";
                     let table = document.getElementById("tableKz");
@@ -697,23 +714,25 @@
             let html = '<span>';
             if (schemaObj.elements[rowId].key == 'complex') {
                 if (schemaObj.resistanceStatus[rowId] != false) {
-                    html += 'E&Prime;<sub>нг</sub>=' + customRound(schemaObj.resistance[rowId].Eng, 1) + ' В<br>';
-                    html += 'Z<sub>1нг</sub>=' + customRound(schemaObj.resistance[rowId].Z1ng, 1) + ' мОм<br>';
-                    html += 'Z<sub>2нг</sub>=' + customRound(schemaObj.resistance[rowId].Z2ng, 1) + ' мОм<br>';
-                    html += 'Z<sub>0нг</sub>=' + customRound(schemaObj.resistance[rowId].Z0ng, 1) + ' мОм<br>';
+                    if (schemaObj.resistance[rowId].Z1ng !== 0 && schemaObj.resistance[rowId].Z1ng !== null) {
+                        html += 'E&Prime;<sub>нг</sub>=' + customRound(schemaObj.resistance[rowId].Eng, 1) + ' В<br>';
+                        html += 'Z<sub>1нг</sub>=' + customRound(schemaObj.resistance[rowId].Z1ng, 1) + ' мОм<br>';
+                        html += 'Z<sub>2нг</sub>=' + customRound(schemaObj.resistance[rowId].Z2ng, 1) + ' мОм<br>';
+                        html += 'Z<sub>0нг</sub>=' + customRound(schemaObj.resistance[rowId].Z0ng, 1) + ' мОм<br>';
+                    }
                 }
             } else {
                 if (schemaObj.resistanceStatus[rowId] != false) {
-                    if (schemaObj.resistance[rowId].r !== 0) {
+                    if (schemaObj.resistance[rowId].r !== 0 && schemaObj.resistance[rowId].r !== null) {
                         html += 'R<sub>' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].r) + ' мОм<br>';
                     }
-                    if (schemaObj.resistance[rowId].x !== 0) {
+                    if (schemaObj.resistance[rowId].x !== 0 && schemaObj.resistance[rowId].x !== null) {
                         html += 'X<sub>' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].x) + ' мОм<br>';
                     }
-                    if (schemaObj.resistance[rowId].r0 !== 0) {
+                    if (schemaObj.resistance[rowId].r0 !== 0 && schemaObj.resistance[rowId].r0 !== null) {
                         html += 'R<sub>0' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].r0) + ' мОм<br>';
                     }
-                    if (schemaObj.resistance[rowId].x0 !== 0) {
+                    if (schemaObj.resistance[rowId].x0 !== 0 && schemaObj.resistance[rowId].x0 !== null) {
                         html += 'X<sub>0' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].x0) + ' мОм';
                     }
                 }
@@ -725,7 +744,6 @@
             } else {
                 return html;
             }
-            console.log(schemaObj);
         }
 
         function convertingData(data) {
@@ -743,7 +761,8 @@
             return counter;
         }
 
-        function customModal(text) { //(text,[primary,info,warning,success,danger])
+        function customModal(text, variable) {
+            text = text.replace('{var}', variable);
             let modal = document.getElementById('modal');
             modal.style.display = 'none';
             let span = document.getElementById('modal-close');
@@ -766,7 +785,6 @@
 
         function tokKz() {
             let countPointKz = isEmptyObject(schemaObj.kzId);
-            let string = "";
             let x = 0;
             let r = 0;
             let error = [];
@@ -811,62 +829,69 @@
                         calc[kzIdkey] = result;
                     }
                     schemaObj.calc = calc;
-                    console.log(calc);
-                    if (typeof schemaObj.calc === 'undefined' || isEmptyObject(schemaObj.calc) === 0) {
-                        customModal(textAddData);
-                    } else {
-                        if (error.length > 0) {
-                            customModal("На участках " + error.join(', ') + " не определены сопротивления");
-                        } else {
-                            string += "<h3>Результаты расчета токов КЗ</h3>";
-                            string += "<table class=\"table table-bordered text-center\">";
-                            string += "<thead class=\"text-center\"><tr>";
-                            string += "<th rowspan='2'>Точка КЗ</th>";
-                            string += "<th rowspan='2'>Вид КЗ</th>";
-                            string += "<th colspan='3'>Максимальное значение тока КЗ, кА</th>";
-                            string += "<th colspan='3'>Минимальное значение тока КЗ, кА</th>";
-                            string += "</tr><tr>";
-                            string += "<th><abbr title='Действующее значение периодической составляющей тока КЗ'>I<sub>к.max</sub></abbr></th>";
-                            string += "<th><abbr title='Наибольшее начальное значение апериодической составляющей тока КЗ'>i<sub>a0.max</sub></abbr></th>";
-                            string += "<th><abbr title='Ударный ток КЗ'>i<sub>уд.max</sub></abbr></th>";
-                            string += "<th><abbr title='Действующее значение периодической составляющей тока КЗ'>I<sub>к.min</sub></abbr></th>";
-                            string += "<th><abbr title='Наибольшее начальное значение апериодической составляющей тока КЗ'>i<sub>a0.min</sub></abbr></th>";
-                            string += "<th><abbr title='Ударный ток КЗ'>i<sub>уд.min</sub></abbr></th>";
-                            string += "</tr></thead><tbody>";
-                            for (let pointKz in calc) {
-                                string += "<tr>";
-                                string += "<td rowspan='3'>Участок " + pointKz + "<br>Точка К" + pointKz + "</td>";
-                                string += "<td>К<sup>(3)</sup></td>";
-                                string += "<td>" + customRound(calc[pointKz].ik3max) + "</td>";
-                                string += "<td>" + customRound(calc[pointKz].ia0max) + "</td>";
-                                string += "<td>" + customRound(calc[pointKz].iudmax) + "</td>";
-                                string += "<td>" + customRound(calc[pointKz].ik3min) + "</td>";
-                                string += "<td>" + customRound(calc[pointKz].ia0min) + "</td>";
-                                string += "<td>" + customRound(calc[pointKz].iudmin) + "</td>";
-                                string += "</tr><tr>";
-                                string += "<td>К<sup>(2)</sup></td>";
-                                string += "<td>" + customRound(calc[pointKz].ik2max) + "</td>";
-                                string += "<td>-</td>";
-                                string += "<td>-</td>";
-                                string += "<td>" + customRound(calc[pointKz].ik2min) + "</td>";
-                                string += "<td>-</td>";
-                                string += "<td>-</td>";
-                                string += "</tr><tr>";
-                                string += "<td>К<sup>(1)</sup></td>";
-                                string += "<td>" + customRound(calc[pointKz].ik1max) + "</td>";
-                                string += "<td>-</td>";
-                                string += "<td>-</td>";
-                                string += "<td>" + customRound(calc[pointKz].ik1min) + "</td>";
-                                string += "<td>-</td>";
-                                string += "<td>-</td>";
-                                string += "</tr>";
-                            }
-                            string += "</tbody></table>";
-                            result(string);
-                        }
-                    }
+                    // console.log(error);
+                    // console.log(schemaObj);
+                    reportTokKz(error);
                 }
             }
+        }
+
+        function reportTokKz(error) {
+            let calc = schemaObj.calc;
+            let string = "";
+            if (typeof calc === 'undefined' || isEmptyObject(calc) === 0) {
+                customModal(textAddData);
+            } else {
+                if (error.length > 0) {
+                    customModal("На участках " + error.join(', ') + " не определены сопротивления");
+                } else {
+                    string += "<h3>Результаты расчета токов КЗ</h3>";
+                    string += "<table class=\"table table-bordered text-center\">";
+                    string += "<thead class=\"text-center\"><tr>";
+                    string += "<th rowspan='2'>Точка КЗ</th>";
+                    string += "<th rowspan='2'>Вид КЗ</th>";
+                    string += "<th colspan='3'>Максимальное значение тока КЗ, кА</th>";
+                    string += "<th colspan='3'>Минимальное значение тока КЗ, кА</th>";
+                    string += "</tr><tr>";
+                    string += "<th><abbr title='Действующее значение периодической составляющей тока КЗ'>I<sub>к.max</sub></abbr></th>";
+                    string += "<th><abbr title='Наибольшее начальное значение апериодической составляющей тока КЗ'>i<sub>a0.max</sub></abbr></th>";
+                    string += "<th><abbr title='Ударный ток КЗ'>i<sub>уд.max</sub></abbr></th>";
+                    string += "<th><abbr title='Действующее значение периодической составляющей тока КЗ'>I<sub>к.min</sub></abbr></th>";
+                    string += "<th><abbr title='Наибольшее начальное значение апериодической составляющей тока КЗ'>i<sub>a0.min</sub></abbr></th>";
+                    string += "<th><abbr title='Ударный ток КЗ'>i<sub>уд.min</sub></abbr></th>";
+                    string += "</tr></thead><tbody>";
+                    for (let pointKz in calc) {
+                        string += "<tr>";
+                        string += "<td rowspan='3'>Участок " + pointKz + "<br>Точка К" + pointKz + "</td>";
+                        string += "<td>К<sup>(3)</sup></td>";
+                        string += "<td>" + customRound(calc[pointKz].ik3max) + "</td>";
+                        string += "<td>" + customRound(calc[pointKz].ia0max) + "</td>";
+                        string += "<td>" + customRound(calc[pointKz].iudmax) + "</td>";
+                        string += "<td>" + customRound(calc[pointKz].ik3min) + "</td>";
+                        string += "<td>" + customRound(calc[pointKz].ia0min) + "</td>";
+                        string += "<td>" + customRound(calc[pointKz].iudmin) + "</td>";
+                        string += "</tr><tr>";
+                        string += "<td>К<sup>(2)</sup></td>";
+                        string += "<td>" + customRound(calc[pointKz].ik2max) + "</td>";
+                        string += "<td>-</td>";
+                        string += "<td>-</td>";
+                        string += "<td>" + customRound(calc[pointKz].ik2min) + "</td>";
+                        string += "<td>-</td>";
+                        string += "<td>-</td>";
+                        string += "</tr><tr>";
+                        string += "<td>К<sup>(1)</sup></td>";
+                        string += "<td>" + customRound(calc[pointKz].ik1max) + "</td>";
+                        string += "<td>-</td>";
+                        string += "<td>-</td>";
+                        string += "<td>" + customRound(calc[pointKz].ik1min) + "</td>";
+                        string += "<td>-</td>";
+                        string += "<td>-</td>";
+                        string += "</tr>";
+                    }
+                    string += "</tbody></table>";
+                    result(string);
+                }
+            } /////
         }
 
         function reportEnergySystem(rowId) {
@@ -1169,8 +1194,6 @@
         }
 
         function report() {
-            //schemaObj = JSON.parse(saveObject); //////////////////////////////////////////////////////// DELETE
-            //console.log(JSON.stringify(schemaObj))
             let error = [];
             let string = '';
             if (isEmptyObject(schemaObj.elements) !== 0) {
@@ -1218,7 +1241,7 @@
                     customModal(textAddPointKz);
                 } else {
                     if (error.length > 0) {
-                        customModal("На участках " + error.join(', ') + " не определены сопротивления");
+                        customModal(textResistanceIsNotDefined, error.join(', '));
 
                     } else {
                         result(string);
@@ -1352,7 +1375,6 @@
                     elLoad.addEventListener("click", function () {
                         let projectId = localStorage.getItem(id);
                         if (projectId !== null) {
-                            //console.log(projectId);
                             renderScheme(projectId);
                         }
                     });
@@ -1431,8 +1453,7 @@
             let dataFileBlock = document.getElementById('dataFileBlock').innerHTML;
             let data = JSON.parse(dataFileBlock);
             //schemaObj = data;
-            renderScheme(JSON.stringify(data));
-//console.log(data);  
+            renderScheme(JSON.stringify(data)); 
         }
 
         function renderScheme(loadedObject) {
@@ -1529,11 +1550,18 @@
             return target;
         }
 
-        function changeElementComplex(elementId, rowId) {
-            changeElementValue(elementId, rowId);
+        function changeElementComplex(elementId, rowId) { 
+            schemaObj.resistanceStatus[rowId] = false; 
+            schemaObj.resistance[rowId] = {current: null, bazis: null, EngRel: null, Z1ngRel: null, Z2ngRel: null, Z0ngRel: null, Eng: null, Z1ng: null, Z2ng: null, Z0ng: null};
             let elSelect = document.getElementById(elementId);
             let elSelectValue = elSelect.value;
-            renderTemplComplex(elSelectValue, rowId);
+            if (elSelectValue == '') {
+                document.getElementById("complex-data").innerHTML = '';
+                addResistance(rowId);
+            } else {
+                renderTemplComplex(elSelectValue, rowId);
+                changeElementValue(elementId, rowId);
+            }
         }
 
         function renderTemplComplex(elSelectValue, rowId) {
@@ -1555,12 +1583,11 @@
                     outerData: null
                 }
                 schemaObj.templates[rowId].push(complexTemplateLoc);
-                html += "   <div class=\"form-group\"><label for=\"" + titleArray[i] + rowId + "\"><i>" + complexTitle[titleArray[i]] + " </i> = </label>";
+                html += "   <div class=\"form-group\"><label for=\"" + titleArray[i] + rowId + "\"><i>" + complexTitle[titleArray[i]] + " </i> =&nbsp;</label>";
                 html += "       <input id=\"" + titleArray[i] + "_" + rowId + "\" onchange=\"changeElementValue(this.id, " + rowId + ")\" class=\"form-control w1\" type=\"text\" data-templatearraykey=\"" + (i + complexTemplate.length) + "\" name=\"" + titleArray[i] + rowId + "\" value=\"\"> кВт";
                 html += "   </div>";
-            }
-            document.getElementById("complex-data").innerHTML = html;
-            console.log(schemaObj);
+            } 
+            document.getElementById("complex-data").innerHTML = html;    
         }
 
     </script>
