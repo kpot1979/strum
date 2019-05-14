@@ -263,14 +263,14 @@
                 tplWrp = tplWrp.split('{tpl}');
             } else {
                 tplWrp = ['', '']
-            }            
+            }
             html += htmlDecode(tplWrp[0]);
             for (let i = 0; i < template.length; i++) {
                 if (i == divider) {
                     html += htmlDecode(tplWrp[1]);
                     if (dividerInsId != null) {
-                        html += htmlDecode(tplWrp[0].replace('&gt;', 'id=\"'+dividerInsId+'\"&gt;'));
-                    }else {
+                        html += htmlDecode(tplWrp[0].replace('&gt;', 'id=\"' + dividerInsId + '\"&gt;'));
+                    } else {
                         html += htmlDecode(tplWrp[0]);
                     }
                 }
@@ -298,7 +298,7 @@
             }
             html += htmlDecode(tplWrp[1]);
             if (dividerInsId != null && template.length <= divider) {
-                html += '<div id=\"'+dividerInsId+'\" class=\"form-inline\"></div>';
+                html += '<div id=\"' + dividerInsId + '\" class=\"form-inline\"></div>';
             }
             return html;
         }
@@ -892,7 +892,7 @@
                     string += "</tbody></table>";
                     result(string);
                 }
-            } 
+            }
         }
 
         function reportEnergySystem(rowId) {
@@ -1454,7 +1454,7 @@
             let dataFileBlock = document.getElementById('dataFileBlock').innerHTML;
             let data = JSON.parse(dataFileBlock);
             //schemaObj = data;
-            renderScheme(JSON.stringify(data)); 
+            renderScheme(JSON.stringify(data));
         }
 
         function renderScheme(loadedObject) {
@@ -1551,9 +1551,20 @@
             return target;
         }
 
-        function changeElementComplex(elementId, rowId) { 
-            schemaObj.resistanceStatus[rowId] = false; 
-            schemaObj.resistance[rowId] = {current: null, bazis: null, EngRel: null, Z1ngRel: null, Z2ngRel: null, Z0ngRel: null, Eng: null, Z1ng: null, Z2ng: null, Z0ng: null};
+        function changeElementComplex(elementId, rowId) {
+            schemaObj.resistanceStatus[rowId] = false;
+            schemaObj.resistance[rowId] = {
+                current: null,
+                bazis: null,
+                EngRel: null,
+                Z1ngRel: null,
+                Z2ngRel: null,
+                Z0ngRel: null,
+                Eng: null,
+                Z1ng: null,
+                Z2ng: null,
+                Z0ng: null
+            };
             let elSelect = document.getElementById(elementId);
             let elSelectValue = elSelect.value;
             if (elSelectValue == '') {
@@ -1587,8 +1598,8 @@
                 html += "   <div class=\"form-group\"><label for=\"" + titleArray[i] + rowId + "\"><i>" + complexTitle[titleArray[i]] + " </i> =&nbsp;</label>";
                 html += "       <input id=\"" + titleArray[i] + "_" + rowId + "\" onchange=\"changeElementValue(this.id, " + rowId + ")\" class=\"form-control w1\" type=\"text\" data-templatearraykey=\"" + (i + complexTemplate.length) + "\" name=\"" + titleArray[i] + rowId + "\" value=\"\"> кВт";
                 html += "   </div>";
-            } 
-            document.getElementById("complex-data").innerHTML = html;    
+            }
+            document.getElementById("complex-data").innerHTML = html;
         }
 
     </script>
