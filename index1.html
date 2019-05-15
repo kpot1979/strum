@@ -17,6 +17,7 @@
             resistanceStatus: {},
             kzId: {},
             calc: {},
+            calcInverse: {},
             defaultVar: {
                 unn: 0.4,
                 uvn: 6.3,
@@ -94,7 +95,8 @@
         var avtomatResistance = {r: null, x: null, r0: null, x0: null};
         var uniqueResistance = {r: null, x: null, r0: null, x0: null};
         var complexResistance = {
-            current: null,
+            currentComplex: null,
+            cosF: null,
             bazis: null,
             EngRel: null,
             Z1ngRel: null,
@@ -323,6 +325,8 @@
                 img = ttSvg;
             } else if (element == 'avtomat') {
                 img = avtomatSvg;
+            } else if (element == 'complex') {
+                img = adLnSvg;
             } else {
                 img = klSvg;
             }
@@ -375,6 +379,7 @@
             delete schemaObj.resistanceStatus[rowId];
             delete schemaObj.kzId[rowId];
             delete schemaObj.calc[rowId];
+            delete schemaObj.calcInverse[rowId];
             //console.log(schemaObj);
         }
 
@@ -648,8 +653,8 @@
                 if (cosF == 0) {
                     customModal(textCosPphi);
                 } else {
-                    let cur = powerSum / (Math.sqrt(3) * cosF * schemaObj.defaultVar.unn)
-                    let bazis = (380 * 1000) / (Math.sqrt(3) * cur);
+                    let currentComplex = powerSum / (Math.sqrt(3) * schemaObj.defaultVar.unn * cosF)
+                    let bazis = (380 * 1000) / (Math.sqrt(3) * currentComplex);
                     for (var j = 0; j < resPower.length; j++) {
                         Eng += getKoef(resPower[j][0], resPower[j][1]);
                         Z1ng += getKoef(resPower[j][0], resPower[j][2]);
@@ -662,7 +667,8 @@
                         Z2ng: bazis * Z2ng / j,
                         Z0ng: bazis * Z0ng / j
                     }
-                    schemaObj.resistance[rowId].current = cur;
+                    schemaObj.resistance[rowId].currentComplex = currentComplex;
+                    schemaObj.resistance[rowId].cosF = cosF;
                     schemaObj.resistance[rowId].bazis = bazis;
                     schemaObj.resistance[rowId].EngRel = Eng / j;
                     schemaObj.resistance[rowId].Z1ngRel = Z1ng / j;
@@ -797,44 +803,80 @@
                     customModal(textAddPointKz);
                 } else {
                     let calc = {};
+                    let calcInverse = {};
                     for (let kzIdkey in schemaObj.kzId) {
                         let result = {};
-                        result.r = 0;
-                        result.x = 0;
-                        result.r0 = 0;
-                        result.x0 = 0;
-                        result.ik3max = 0;
-                        result.ik3min = 0;
-                        result.ik2 = 0;
-                        result.ik1 = 0;
+                        let resultInverse = {};
+                        result.r = result.x = result.r0 = result.x0 = result.ik3max = result.ik3min = result.ik2 = result.ik1 = 0;
+                        resultInverse.r = resultInverse.x = resultInverse.r0 = resultInverse.x0 = 0;
                         for (let rowId in schemaObj.resistance) {
                             result.r += schemaObj.resistance[rowId].r;
                             result.x += schemaObj.resistance[rowId].x;
                             result.r0 += schemaObj.resistance[rowId].r0;
                             result.x0 += schemaObj.resistance[rowId].x0;
-                            if (schemaObj.resistance[rowId].r === null || schemaObj.resistance[rowId].x === null || !isFinite(schemaObj.resistance[rowId].r) || !isFinite(schemaObj.resistance[rowId].x) || (schemaObj.resistance[rowId].r == 0 && schemaObj.resistance[rowId].x == 0 && schemaObj.resistance[rowId].r0 == 0 && schemaObj.resistance[rowId].x0 == 0)) {
-                                error.push(rowId);
+                            if (schemaObj.elements[rowId].key == 'complex') {
+                                continue; 
+                            } else {
+                                if (schemaObj.resistance[rowId].r === null || schemaObj.resistance[rowId].x === null || !isFinite(schemaObj.resistance[rowId].r) || !isFinite(schemaObj.resistance[rowId].x) || (schemaObj.resistance[rowId].r == 0 && schemaObj.resistance[rowId].x == 0 && schemaObj.resistance[rowId].r0 == 0 && schemaObj.resistance[rowId].x0 == 0)) {
+                                    error.push(rowId);
+                                }
+                                if (kzIdkey == rowId) break;
                             }
-                            if (kzIdkey == rowId) break;
                         }
-                        let arcResistance = schemaObj.defaultVar.arcResistance * 1;
-                        result.ik3max = (schemaObj.defaultVar.unn * 1000) / (Math.sqrt(3) * Math.sqrt(Math.pow(result.x, 2) + Math.pow(result.r, 2)));
-                        result.ik3min = (schemaObj.defaultVar.unn * 1000) / (Math.sqrt(3) * Math.sqrt(Math.pow(result.x, 2) + Math.pow(result.r + arcResistance, 2)));
-                        result.iudmax = Math.sqrt(2) * result.ik3max * koefUd(result.r, result.x);
-                        result.iudmin = Math.sqrt(2) * result.ik3min * koefUd(result.r + arcResistance, result.x);
-                        result.ia0max = Math.sqrt(2) * result.ik3max;
-                        result.ia0min = Math.sqrt(2) * result.ik3min;
-                        result.ik2max = (schemaObj.defaultVar.unn * 1000) / (2 * Math.sqrt(Math.pow(result.x, 2) + Math.pow(result.r, 2)));
-                        result.ik2min = (schemaObj.defaultVar.unn * 1000) / (2 * Math.sqrt(Math.pow(result.x, 2) + Math.pow(result.r + arcResistance / 2, 2)));
-                        result.ik1max = (schemaObj.defaultVar.unn * 1000 * Math.sqrt(3)) / Math.sqrt(Math.pow((2 * result.x) + result.x0, 2) + Math.pow((2 * (result.r)) + (result.r0), 2));
-                        result.ik1min = (schemaObj.defaultVar.unn * 1000 * Math.sqrt(3)) / Math.sqrt(Math.pow((2 * result.x) + result.x0, 2) + Math.pow((2 * (result.r + arcResistance)) + (result.r0 + arcResistance), 2));
+                        for (let rowId in schemaObj.resistance) { //Inverse
+                            if (rowId <= kzIdkey || schemaObj.elements[rowId].key == 'complex') {
+                                continue;
+                            } else {
+                                resultInverse.r += schemaObj.resistance[rowId].r;
+                                resultInverse.x += schemaObj.resistance[rowId].x;
+                                resultInverse.r0 += schemaObj.resistance[rowId].r0;
+                                resultInverse.x0 += schemaObj.resistance[rowId].x0;   
+                            }
+                        }
+                        calcTokKz(result);
+                        calcTokKzInverse(resultInverse);
                         calc[kzIdkey] = result;
+                        calcInverse[kzIdkey] = resultInverse;
                     }
                     schemaObj.calc = calc;
-                    // console.log(schemaObj);
+                    schemaObj.calcInverse = calcInverse;
+                    console.log(schemaObj);
                     reportTokKz(error);
                 }
             }
+        }
+
+        function calcTokKz(obj) {
+            let arcResistance = schemaObj.defaultVar.arcResistance * 1;
+            obj.ik3max = (schemaObj.defaultVar.unn * 1000) / (Math.sqrt(3) * Math.sqrt(Math.pow(obj.x, 2) + Math.pow(obj.r, 2)));
+            obj.ik3min = (schemaObj.defaultVar.unn * 1000) / (Math.sqrt(3) * Math.sqrt(Math.pow(obj.x, 2) + Math.pow(obj.r + arcResistance, 2)));
+            obj.iudmax = Math.sqrt(2) * obj.ik3max * koefUd(obj.r, obj.x);
+            obj.iudmin = Math.sqrt(2) * obj.ik3min * koefUd(obj.r + arcResistance, obj.x);
+            obj.ia0max = Math.sqrt(2) * obj.ik3max;
+            obj.ia0min = Math.sqrt(2) * obj.ik3min;
+            obj.ik2max = (schemaObj.defaultVar.unn * 1000) / (2 * Math.sqrt(Math.pow(obj.x, 2) + Math.pow(obj.r, 2)));
+            obj.ik2min = (schemaObj.defaultVar.unn * 1000) / (2 * Math.sqrt(Math.pow(obj.x, 2) + Math.pow(obj.r + arcResistance / 2, 2)));
+            obj.ik1max = (schemaObj.defaultVar.unn * 1000 * Math.sqrt(3)) / Math.sqrt(Math.pow((2 * obj.x) + obj.x0, 2) + Math.pow((2 * (obj.r)) + (obj.r0), 2));
+            obj.ik1min = (schemaObj.defaultVar.unn * 1000 * Math.sqrt(3)) / Math.sqrt(Math.pow((2 * obj.x) + obj.x0, 2) + Math.pow((2 * (obj.r + arcResistance)) + (obj.r0 + arcResistance), 2));
+            return obj;
+        }
+
+        function calcTokKzInverse(obj) {
+            let lastElement = lastElementObj(schemaObj.elements);
+            let resistance = schemaObj.resistance[lastElement.rowId];
+            let arcResistance = schemaObj.defaultVar.arcResistance * 1;
+            if (lastElement && lastElement.key == 'complex') {
+                let sinF = Math.sin(Math.acos(resistance.cosF));
+                obj.ik3max = resistance.Eng / (Math.sqrt(3) * Math.sqrt(Math.pow(resistance.Z1ng * resistance.cosF + obj.r, 2) + Math.pow(resistance.Z1ng * sinF + obj.x, 2)));
+                obj.ik3min = resistance.Eng / (Math.sqrt(3) * Math.sqrt(Math.pow(resistance.Z1ng * resistance.cosF + obj.r + arcResistance, 2) + Math.pow(resistance.Z1ng * sinF + obj.x, 2)));
+                obj.iudmax = Math.sqrt(2) * obj.ik3max * koefUd(obj.r, obj.x);
+                obj.iudmin = Math.sqrt(2) * obj.ik3min * koefUd(obj.r + arcResistance, obj.x);
+                obj.ia0max = Math.sqrt(2) * obj.ik3max;
+                obj.ia0min = Math.sqrt(2) * obj.ik3min;
+                console.log([arcResistance, resistance.cosF, sinF, resistance.Eng, resistance.Z1ng, obj.r, obj.x, koefUd(obj.r, obj.x), koefUd(obj.r + arcResistance, obj.x)]);
+            }
+
+            return obj;
         }
 
         function reportTokKz(error) {
@@ -1105,7 +1147,7 @@
                 string += 'X<sub>0&sum;</sub> = ' + formulaX0.replace(/\+ $/g, '') + ' = ' + valuesX0.replace(/\+ $/g, '') + ' = ' + customRound(X0) + ' мОм.<br>';
                 let arcResistance = schemaObj.defaultVar.arcResistance * 1;
                 let rSumAccent = customRound(R) + arcResistance;
-                string += 'R<sub>&sum;</sub>&prime; = R<sub>&sum;</sub> + R<sub>д</sub>  = ' + customRound(R) + ' + ' + arcResistance + ' = ' + rSumAccent + ' мОм;<br>';
+                string += 'R<sub>&sum;</sub>&prime; = R<sub>&sum;</sub> + R<sub>д</sub>  = ' + customRound(R) + ' + ' + arcResistance + ' = ' + customRound(rSumAccent) + ' мОм;<br>';
                 let ik3max = customRound((schemaObj.defaultVar.unn * 1000) / (Math.sqrt(3) * Math.sqrt(Math.pow(X, 2) + Math.pow(R, 2))));
                 let ik3min = customRound((schemaObj.defaultVar.unn * 1000) / (Math.sqrt(3) * Math.sqrt(Math.pow(X, 2) + Math.pow(R + arcResistance, 2))));
                 let ikudmax = customRound(Math.sqrt(2) * ik3max * koefUd(R, X));
@@ -1554,7 +1596,8 @@
         function changeElementComplex(elementId, rowId) {
             schemaObj.resistanceStatus[rowId] = false;
             schemaObj.resistance[rowId] = {
-                current: null,
+                currentComplex: null,
+                cosF: null,
                 bazis: null,
                 EngRel: null,
                 Z1ngRel: null,
