@@ -896,7 +896,8 @@
                 customModal(textAddData);
             } else {
                 if (error.length > 0) {
-                    customModal(textResistanceIsNotDefined, error.join(', '));
+                    console.log(error);
+                    customModal(textResistanceIsNotDefined, error.filter((item, pos, ar) => ar.indexOf(item) === pos).join(', '));
                 } else {
                     let rowspan = 3
                     if (lastElement && lastElement.key == 'complex') {
@@ -1046,8 +1047,8 @@
                     customModal(textAddPointKz);
                 } else {
                     if (error.length > 0) {
-                        customModal(textResistanceIsNotDefined, error.join(', '));
-
+                        console.log(error);
+                        customModal(textResistanceIsNotDefined, error.filter((item, pos, ar) => ar.indexOf(item) === pos).join(', '));
                     } else {
                         result(string);
                     }
