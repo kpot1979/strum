@@ -95,7 +95,7 @@
         var avtomatResistance = {r: null, x: null, r0: null, x0: null};
         var uniqueResistance = {r: null, x: null, r0: null, x0: null};
         var complexResistance = {
-            currentComplex: null,
+            current: null,
             cosF: null,
             bazis: null,
             EngRel: null,
@@ -369,6 +369,14 @@
                 lastElement = obj[key];
             }
             return lastElement;
+        }
+
+        function firstElementObj(obj) {
+            let i = 0;
+            for (var key in obj) {
+                if (i == 0) return obj[key];
+                i++;
+            }
         }
 
         function deleteRow(rowId) {
@@ -653,8 +661,8 @@
                 if (cosF == 0) {
                     customModal(textCosPphi);
                 } else {
-                    let currentComplex = powerSum / (Math.sqrt(3) * schemaObj.defaultVar.unn * cosF)
-                    let bazis = (380 * 1000) / (Math.sqrt(3) * currentComplex);
+                    let current = powerSum / (Math.sqrt(3) * schemaObj.defaultVar.unn * cosF)
+                    let bazis = (380 * 1000) / (Math.sqrt(3) * current);
                     for (var j = 0; j < resPower.length; j++) {
                         Eng += getKoef(resPower[j][0], resPower[j][1]);
                         Z1ng += getKoef(resPower[j][0], resPower[j][2]);
@@ -667,7 +675,7 @@
                         Z2ng: bazis * Z2ng / j,
                         Z0ng: bazis * Z0ng / j
                     }
-                    schemaObj.resistance[rowId].currentComplex = currentComplex;
+                    schemaObj.resistance[rowId].current = current;
                     schemaObj.resistance[rowId].cosF = cosF;
                     schemaObj.resistance[rowId].bazis = bazis;
                     schemaObj.resistance[rowId].EngRel = Eng / j;
@@ -881,6 +889,8 @@
 
         function reportTokKz(error) {
             let calc = schemaObj.calc;
+            let lastElement = lastElementObj(schemaObj.elements);
+            let firstElement = firstElementObj(schemaObj.elements);
             let string = "";
             if (typeof calc === 'undefined' || isEmptyObject(calc) === 0) {
                 customModal(textAddData);
@@ -888,54 +898,164 @@
                 if (error.length > 0) {
                     customModal(textResistanceIsNotDefined, error.join(', '));
                 } else {
+                    let rowspan = 3
+                    if (lastElement && lastElement.key == 'complex') {
+                        rowspan = rowspan + 2; 
+                    }
                     string += "<h3>Результаты расчета токов КЗ</h3>";
                     string += "<table class=\"table table-bordered text-center\">";
                     string += "<thead class=\"text-center\"><tr>";
-                    string += "<th rowspan='2'>Точка КЗ</th>";
-                    string += "<th rowspan='2'>Вид КЗ</th>";
-                    string += "<th colspan='3'>Максимальное значение тока КЗ, кА</th>";
-                    string += "<th colspan='3'>Минимальное значение тока КЗ, кА</th>";
+                    string += "    <th rowspan='2'>Точка КЗ</th>";
+                    string += "    <th rowspan='2'>Ветка</th>";
+                    string += "    <th rowspan='2'>Вид КЗ</th>";
+                    string += "    <th colspan='3'>Максимальное значение тока КЗ, кА</th>";
+                    string += "    <th colspan='3'>Минимальное значение тока КЗ, кА</th>";
                     string += "</tr><tr>";
-                    string += "<th><abbr title='Действующее значение периодической составляющей тока КЗ'>I<sub>к.max</sub></abbr></th>";
-                    string += "<th><abbr title='Наибольшее начальное значение апериодической составляющей тока КЗ'>i<sub>a0.max</sub></abbr></th>";
-                    string += "<th><abbr title='Ударный ток КЗ'>i<sub>уд.max</sub></abbr></th>";
-                    string += "<th><abbr title='Действующее значение периодической составляющей тока КЗ'>I<sub>к.min</sub></abbr></th>";
-                    string += "<th><abbr title='Наибольшее начальное значение апериодической составляющей тока КЗ'>i<sub>a0.min</sub></abbr></th>";
-                    string += "<th><abbr title='Ударный ток КЗ'>i<sub>уд.min</sub></abbr></th>";
+                    string += "    <th><abbr title='Действующее значение периодической составляющей тока КЗ'>I<sub>к.max</sub></abbr></th>";
+                    string += "    <th><abbr title='Наибольшее начальное значение апериодической составляющей тока КЗ'>i<sub>a0.max</sub></abbr></th>";
+                    string += "    <th><abbr title='Ударный ток КЗ'>i<sub>уд.max</sub></abbr></th>";
+                    string += "    <th><abbr title='Действующее значение периодической составляющей тока КЗ'>I<sub>к.min</sub></abbr></th>";
+                    string += "    <th><abbr title='Наибольшее начальное значение апериодической составляющей тока КЗ'>i<sub>a0.min</sub></abbr></th>";
+                    string += "    <th><abbr title='Ударный ток КЗ'>i<sub>уд.min</sub></abbr></th>";
                     string += "</tr></thead><tbody>";
                     for (let pointKz in calc) {
                         string += "<tr>";
-                        string += "<td rowspan='3'>Участок " + pointKz + "<br>Точка К" + pointKz + "</td>";
-                        string += "<td>К<sup>(3)</sup></td>";
-                        string += "<td>" + customRound(calc[pointKz].ik3max) + "</td>";
-                        string += "<td>" + customRound(calc[pointKz].ia0max) + "</td>";
-                        string += "<td>" + customRound(calc[pointKz].iudmax) + "</td>";
-                        string += "<td>" + customRound(calc[pointKz].ik3min) + "</td>";
-                        string += "<td>" + customRound(calc[pointKz].ia0min) + "</td>";
-                        string += "<td>" + customRound(calc[pointKz].iudmin) + "</td>";
+                        string += "    <td rowspan='" + rowspan + "'>Участок " + pointKz + "<br>Точка К" + pointKz + "</td>";
+                        string += "    <td rowspan='3'>" + firstElement.name + " - Точка К" + pointKz + "</td>";
+                        string += "    <td>К<sup>(3)</sup></td>";
+                        string += "    <td>" + customRound(calc[pointKz].ik3max) + "</td>";
+                        string += "    <td>" + customRound(calc[pointKz].ia0max) + "</td>";
+                        string += "    <td>" + customRound(calc[pointKz].iudmax) + "</td>";
+                        string += "    <td>" + customRound(calc[pointKz].ik3min) + "</td>";
+                        string += "    <td>" + customRound(calc[pointKz].ia0min) + "</td>";
+                        string += "    <td>" + customRound(calc[pointKz].iudmin) + "</td>";
                         string += "</tr><tr>";
-                        string += "<td>К<sup>(2)</sup></td>";
-                        string += "<td>" + customRound(calc[pointKz].ik2max) + "</td>";
-                        string += "<td>-</td>";
-                        string += "<td>-</td>";
-                        string += "<td>" + customRound(calc[pointKz].ik2min) + "</td>";
-                        string += "<td>-</td>";
-                        string += "<td>-</td>";
+                        string += "    <td>К<sup>(2)</sup></td>";
+                        string += "    <td>" + customRound(calc[pointKz].ik2max) + "</td>";
+                        string += "    <td>-</td>";
+                        string += "    <td>-</td>";
+                        string += "    <td>" + customRound(calc[pointKz].ik2min) + "</td>";
+                        string += "    <td>-</td>";
+                        string += "    <td>-</td>";
                         string += "</tr><tr>";
-                        string += "<td>К<sup>(1)</sup></td>";
-                        string += "<td>" + customRound(calc[pointKz].ik1max) + "</td>";
-                        string += "<td>-</td>";
-                        string += "<td>-</td>";
-                        string += "<td>" + customRound(calc[pointKz].ik1min) + "</td>";
-                        string += "<td>-</td>";
-                        string += "<td>-</td>";
+                        string += "    <td>К<sup>(1)</sup></td>";
+                        string += "    <td>" + customRound(calc[pointKz].ik1max) + "</td>";
+                        string += "    <td>-</td>";
+                        string += "    <td>-</td>";
+                        string += "    <td>" + customRound(calc[pointKz].ik1min) + "</td>";
+                        string += "    <td>-</td>";
+                        string += "    <td>-</td>";
                         string += "</tr>";
+                        if (lastElement && lastElement.key == 'complex') {
+                            let ik3max = schemaObj.calcInverse[pointKz].ik3max;
+                            let ia0max = schemaObj.calcInverse[pointKz].ia0max;
+                            let iudmax = schemaObj.calcInverse[pointKz].iudmax;
+                            let ik3min = schemaObj.calcInverse[pointKz].ik3min;
+                            let ia0min = schemaObj.calcInverse[pointKz].ia0min;
+                            let iudmin = schemaObj.calcInverse[pointKz].iudmin;
+                            let indexArr = lastElement.name.split(" ");
+                            let index = indexArr.map(function(item) {
+                              return item[0].toUpperCase();
+                            });
+                            index = index.join('');
+                            let alert = '';
+                            console.log(schemaObj.resistance[lastElement.rowId].current);
+                            if (schemaObj.resistance[lastElement.rowId].current < (10 * calc[pointKz].ik3max)) {
+                                alert = '<br><span class="text-danger">I<sub>' + index + '</sub> = ' + customRound(schemaObj.resistance[lastElement.rowId].current, 1) + 'А < ' + customRound(calc[pointKz].ik3max * 10, 1) + 'А (0,01 * I<sub>к.max</sub>), значит его можно не учитывать!</span>';
+                            }
+                            string += "<tr>";
+                            string += "    <td>Точка К" + pointKz + " - " + lastElement.name + alert + "</td>";
+                            string += "    <td>К<sup>(3)</sup></td>";
+                            string += "    <td>" + customRound(ik3max) + "</td>";
+                            string += "    <td>" + customRound(ia0max) + "</td>";
+                            string += "    <td>" + customRound(iudmax) + "</td>";
+                            string += "    <td>" + customRound(ik3min) + "</td>";
+                            string += "    <td>" + customRound(ia0min) + "</td>";
+                            string += "    <td>" + customRound(iudmin) + "</td>";
+                            string += "</tr>"; 
+                            if (schemaObj.resistance[lastElement.rowId].current < (10 * calc[pointKz].ik3max)) {
+                            ik3max = ia0max = iudmax = ik3min = ia0min = iudmin = 0;
+                            }
+                            string += "<tr>";
+                            string += "    <td><strong>Суммарный:</strong></td>";
+                            string += "    <td>К<sup>(3)</sup></td>";
+                            string += "    <td><strong>" + customRound(ik3max + calc[pointKz].ik3max) + "</strong></td>";
+                            string += "    <td><strong>" + customRound(ia0max + calc[pointKz].ia0max) + "</strong></td>";
+                            string += "    <td><strong>" + customRound(iudmax + calc[pointKz].iudmax) + "</strong></td>";
+                            string += "    <td><strong>" + customRound(ik3min + calc[pointKz].ik3min) + "</strong></td>";
+                            string += "    <td><strong>" + customRound(ia0min + calc[pointKz].ia0min) + "</strong></td>";
+                            string += "    <td><strong>" + customRound(iudmin + calc[pointKz].iudmin) + "</strong></td>";
+                            string += "</tr>";  
+                        }                        
                     }
                     string += "</tbody></table>";
                     result(string);
                 }
             }
         }
+
+        function report() {
+            let error = [];
+            let string = '';
+            if (isEmptyObject(schemaObj.elements) !== 0) {
+                string += '<div class="row">';
+                string += '<h3>Расчет токов КЗ 0,4кВ (ГОСТ 28249-93)</h3><br>';
+                string += '<div class="col-md-5">';
+                string += reportSchema();
+                string += '</div>';
+                string += '<div class="col-md-7">';
+                string += '<div class="area">R - <i>активное сопротивление прямой последовательности;</i><br>X - <i>индуктивное сопротивление прямой последовательности;</i><br>R<sub>0</sub> - <i>активное сопротивление обратной последовательности;</i><br>X<sub>0</sub> - <i>индуктивное сопротивление обратной последовательности;</i></div>';
+                for (rowId in schemaObj.elements) {
+                    let title = '';
+                    if (schemaObj.elements[rowId].title !== null) {
+                        title = schemaObj.elements[rowId].title;
+                    } else {
+                        title = schemaObj.elements[rowId].name;
+                    }
+                    if (schemaObj.elements[rowId].key == 'energySystem') {
+                        string += reportEnergySystem(rowId);
+                    } else if (schemaObj.elements[rowId].key == 'transformator') {
+                        string += reportTransformator(rowId, title);
+                    } else if (schemaObj.elements[rowId].key == 'kabelVn') {
+                        string += reportKabelVn(rowId, title);
+                    } else if (schemaObj.elements[rowId].key == 'kabelNn') {
+                        string += reportKabelNn(rowId, title);
+                    } else if (schemaObj.elements[rowId].key == 'shinoprovod') {
+                        string += reportShinoprovod(rowId, title);
+                    } else if (schemaObj.elements[rowId].key == 'hookup') { //контакты
+                        string += reportHookup(rowId, title);
+                    } else if (schemaObj.elements[rowId].key == 'tt') {
+                        string += reportTt(rowId, title);
+                    } else if (schemaObj.elements[rowId].key == 'avtomat') {
+                        string += reportAvtomat(rowId, title);
+                    } else if (schemaObj.elements[rowId].key == 'unique') {
+                        string += reportUnique(rowId, title);
+                    }
+                    if (schemaObj.elements[rowId].key == 'complex') {
+                        continue; 
+                    } else {
+                        if (schemaObj.resistance[rowId].r === null || schemaObj.resistance[rowId].x === null || !isFinite(schemaObj.resistance[rowId].r) || !isFinite(schemaObj.resistance[rowId].x) || (schemaObj.resistance[rowId].r == 0 && schemaObj.resistance[rowId].x == 0 && schemaObj.resistance[rowId].r0 == 0 && schemaObj.resistance[rowId].x0 == 0)) {
+                            error.push(rowId);
+                        }
+                    }
+                }
+                string += reportCalcKz();
+                string += '</div>';
+                string += '</div>';
+                if (isEmptyObject(schemaObj.kzId) === 0) {
+                    customModal(textAddPointKz);
+                } else {
+                    if (error.length > 0) {
+                        customModal(textResistanceIsNotDefined, error.join(', '));
+
+                    } else {
+                        result(string);
+                    }
+                }
+            } else {
+                customModal(textAddEl);
+            }
+        }        
 
         function reportEnergySystem(rowId) {
             let string = '';
@@ -1234,65 +1354,6 @@
             string += '</div>';
             string += '</div>';
             return string;
-        }
-
-        function report() {
-            let error = [];
-            let string = '';
-            if (isEmptyObject(schemaObj.elements) !== 0) {
-                string += '<div class="row">';
-                string += '<h3>Расчет токов КЗ 0,4кВ (ГОСТ 28249-93)</h3><br>';
-                string += '<div class="col-md-5">';
-                string += reportSchema();
-                string += '</div>';
-                string += '<div class="col-md-7">';
-                string += '<div class="area">R - <i>активное сопротивление прямой последовательности;</i><br>X - <i>индуктивное сопротивление прямой последовательности;</i><br>R<sub>0</sub> - <i>активное сопротивление обратной последовательности;</i><br>X<sub>0</sub> - <i>индуктивное сопротивление обратной последовательности;</i></div>';
-                for (rowId in schemaObj.elements) {
-                    let title = '';
-                    if (schemaObj.elements[rowId].title !== null) {
-                        title = schemaObj.elements[rowId].title;
-                    } else {
-                        title = schemaObj.elements[rowId].name;
-                    }
-                    if (schemaObj.elements[rowId].key == 'energySystem') {
-                        string += reportEnergySystem(rowId);
-                    } else if (schemaObj.elements[rowId].key == 'transformator') {
-                        string += reportTransformator(rowId, title);
-                    } else if (schemaObj.elements[rowId].key == 'kabelVn') {
-                        string += reportKabelVn(rowId, title);
-                    } else if (schemaObj.elements[rowId].key == 'kabelNn') {
-                        string += reportKabelNn(rowId, title);
-                    } else if (schemaObj.elements[rowId].key == 'shinoprovod') {
-                        string += reportShinoprovod(rowId, title);
-                    } else if (schemaObj.elements[rowId].key == 'hookup') { //контакты
-                        string += reportHookup(rowId, title);
-                    } else if (schemaObj.elements[rowId].key == 'tt') {
-                        string += reportTt(rowId, title);
-                    } else if (schemaObj.elements[rowId].key == 'avtomat') {
-                        string += reportAvtomat(rowId, title);
-                    } else if (schemaObj.elements[rowId].key == 'unique') {
-                        string += reportUnique(rowId, title);
-                    }
-                    if (schemaObj.resistance[rowId].r === null || schemaObj.resistance[rowId].x === null || !isFinite(schemaObj.resistance[rowId].r) || !isFinite(schemaObj.resistance[rowId].x) || (schemaObj.resistance[rowId].r == 0 && schemaObj.resistance[rowId].x == 0 && schemaObj.resistance[rowId].r0 == 0 && schemaObj.resistance[rowId].x0 == 0)) {
-                        error.push(rowId);
-                    }
-                }
-                string += reportCalcKz();
-                string += '</div>';
-                string += '</div>';
-                if (isEmptyObject(schemaObj.kzId) === 0) {
-                    customModal(textAddPointKz);
-                } else {
-                    if (error.length > 0) {
-                        customModal(textResistanceIsNotDefined, error.join(', '));
-
-                    } else {
-                        result(string);
-                    }
-                }
-            } else {
-                customModal(textAddEl);
-            }
         }
 
         function koefUd(r, x) {
@@ -1596,7 +1657,7 @@
         function changeElementComplex(elementId, rowId) {
             schemaObj.resistanceStatus[rowId] = false;
             schemaObj.resistance[rowId] = {
-                currentComplex: null,
+                current: null,
                 cosF: null,
                 bazis: null,
                 EngRel: null,
