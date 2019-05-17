@@ -1254,7 +1254,15 @@
             }
             string += str1 + '<br>';
             string += str2;
-            string += 'Параметры комплексной нагрузки в относительных единицах определяем по кривым:<br>E&Prime;<sub>&lowast;НГ</sub> = ' + customRound(schemaObj.resistance[rowId].EngRel) + ';&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Z<sub>&lowast;1НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z1ngRel) + ';&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Z<sub>&lowast;2НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z2ngRel) + ';&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Z<sub>&lowast;0НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z0ngRel) + ';&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>';
+            string += 'Параметры комплексной нагрузки в относительных единицах определяем по кривым<br>';
+            string += 'Эквивалентная сверхпереходная ЭДС:<br>';
+            string += 'E&Prime;<sub>&lowast;НГ</sub> = ' + customRound(schemaObj.resistance[rowId].EngRel) + ';<br>';
+            string += 'Сопротивление прямой последовательности комплексной нагрузки:<br>';
+            string += 'Z<sub>&lowast;1НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z1ngRel) + ';<br>';
+            string += 'Сопротивление обратной последовательности комплексной нагрузки:<br>';
+            string += 'Z<sub>&lowast;2НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z2ngRel) + ';<br>';
+            string += 'Сопротивление нулевой последовательности комплексной нагрузки:<br>';
+            string += 'Z<sub>&lowast;0НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z0ngRel) + ';<br>';
             string += 'Ток комплексной нагрузки:<br>';
             string += '<table style="min-width: 375px;"><tr><td rowspan="2">I<sub>' + index + '</sub>&nbsp;=&nbsp;</td><td style="text-align:center;">P<sub>&sum;' + index + '</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">' + schemaObj.resistance[rowId].powerSum + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].current, 1) + ' А;</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; U<sub>нн</sub>  &times; cos&phi;</td><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; 0.4 &times; ' + schemaObj.resistance[rowId].cosF + '</td></tr></table>';
             string += 'Базисное сопротивление:<br>';
@@ -1340,7 +1348,7 @@
                 string += '<h5><i>Значение ударного тока КЗ</i>:</h5>';
                 string += 'i<sub>уд.max</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.max</sub><sup>(3)</sup> &times; K<sub>уд</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + ik3max + ' &times; ' + koefUd(R, X) + ' = ' + ikudmax + ' кА;<br>';
                 string += 'i<sub>уд.min</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.min</sub><sup>(3)</sup> &times; K<sub>уд</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + ik3min + ' &times; ' + koefUd(R + arcResistance, X) + ' = ' + ikudmin + ' кА;<br>';
-                string += 'K<sub>уд</sub> - <i>Ударный коэффициент (см. кривые зависимости ударного коэффициента от отношений R/X и X/R).</i></p>';
+                string += 'K<sub>уд</sub> - <i>Ударный коэффициент (<a href=\"#koeff\">см. кривые зависимости ударного коэффициента от отношений R/X и X/R</a>).</i></p>';
                 string += '<h5><i>Максимальное значение двухфазного тока КЗ</i>:</h5>';
                 string += '<div class="table-responsive"><table style="min-width: 540px;"><tr><td rowspan="2">I<sub>к.max</sub><sup>(2)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">U<sub>нн</sub> &times; 10<sup>3</sup></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">' + schemaObj.defaultVar.unn + ' &times; 1000</td><td rowspan="2">&nbsp;=&nbsp;' + ik2max + ' кА;</td></tr><tr><td style="border-top: 1px solid #000;"> 2 &times; &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">R<sub>&sum;</sub><sup>2</sup> + X<sub>&sum;</sub><sup>2</sup></div></td><td style="border-top: 1px solid #000;"> 2 &times; &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">' + customRound(R) + '<sup>2</sup> + ' + customRound(X) + '<sup>2</sup></div></td></tr></table><br></div>';
                 string += '<h5><i>Минимальное значение двухфазного тока КЗ (с учетом сопротивления дуги)</i>:</h5>';
@@ -1369,10 +1377,10 @@
                     title += '<br>' + schemaObj.templates[rowId][0].textItem;
                 }
                 string += '<div class="row">';
-                string += '<div class="col-xs-6">';
-                string += '<div class="reportTitle"><span><strong> ' + rowId + ') </strong></span><span> ' + title + ' </span></div>';
-                string += '</div>';
-                string += '<div class="col-xs-6">';
+                string += '    <div class="col-xs-6">';
+                string += '        <div class="reportTitle"><span><strong> ' + rowId + ') </strong></span><span> ' + title + ' </span></div>';
+                string += '    </div>';
+                string += '    <div class="col-xs-6">';
                 let img;
                 if (schemaObj.elements[rowId].key == 'energySystem') {
                     img = reportSysSvg;
@@ -1387,22 +1395,22 @@
                     pointKz = ' pointKz';
                     pointKzImg = '<span>К' + rowId + '</span> ' + pointKzSvg;
                 }
-                string += '<div class="' + schemaObj.elements[rowId].key + 'Img' + pointKz + '">';
-                string += '   <div class="resistanceData">' + addResistance(rowId, true) + '</div>';
-                string += '   <div id="pointKzWrapper' + rowId + '" class="pointKzWrapper">' + pointKzImg + '</div>';
+                string += '        <div class="' + schemaObj.elements[rowId].key + 'Img' + pointKz + '">';
+                string += '            <div class="resistanceData">' + addResistance(rowId, true) + '</div>';
+                string += '            <div id="pointKzWrapper' + rowId + '" class="pointKzWrapper">' + pointKzImg + '</div>';
                 string += img;
-                string += '</div>';
-                string += '</div>';
+                string += '        </div>';
+                string += '    </div>';
                 string += '</div>';
             }
             string += '<div class="row">';
-            string += '<div class="col-xs-12 img-responsive">';
-            string += '<br><br><h4>Кривые зависимости ударного коэффициента от отношений R/X и X/R</h4>';
+            string += '    <div class="col-xs-12 img-responsive">';
+            string += '    <br><br><h4><a name="koeff">Кривые зависимости ударного коэффициента от отношений R/X и X/R</a></h4>';
             string += koefRXSvg;
-            string += '</div>';
-            string += '<div class="col-xs-12 img-responsive"><br>';
+            string += '    </div>';
+            string += '    <div class="col-xs-12 img-responsive"><br>';
             string += koefXRSvg;
-            string += '</div>';
+            string += '    </div>';
             string += '</div>';
             return string;
         }
