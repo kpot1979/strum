@@ -95,6 +95,7 @@
         var avtomatResistance = {r: null, x: null, r0: null, x0: null};
         var uniqueResistance = {r: null, x: null, r0: null, x0: null};
         var complexResistance = {
+            powerSum: null,
             current: null,
             cosF: null,
             bazis: null,
@@ -170,7 +171,7 @@
         var textSaveFileError = '<p class=\"text-danger\">Ошибка при сохранении проекта в файл!</p>';
         var textLastEl = '<p class=\"text-danger\">Элемент \"{var}\" должен быть последним в схеме!</p>';
         var textCosPphi = '<p class=\"text-danger\">Введите значение cos&phi;!</p>';
-        var textResistanceIsNotDefined = '<p class=\"text-danger\">На участках {var} не определены сопротивления!</p>';
+        var textResistanceIsNotDefined = '<p class=\"text-danger\">На {var} не определены сопротивления!</p>';
 
         window.onload = function () {
             var elementSelect = document.getElementById("elementSelect");
@@ -326,7 +327,7 @@
             } else if (element == 'avtomat') {
                 img = avtomatSvg;
             } else if (element == 'complex') {
-                img = adLnSvg;
+                img = adLnPSvg;
             } else {
                 img = klSvg;
             }
@@ -396,7 +397,6 @@
             if (elementSelect != '') {
                 let lastElement = lastElementObj(schemaObj.elements);
                 if (lastElement && lastElement.key == 'complex') {
-                    console.log(schemaObj);
                     customModal(textLastEl, lastElement.name);
                 } else {
                     let html = "";
@@ -675,6 +675,7 @@
                         Z2ng: bazis * Z2ng / j,
                         Z0ng: bazis * Z0ng / j
                     }
+                    schemaObj.resistance[rowId].powerSum = powerSum;
                     schemaObj.resistance[rowId].current = current;
                     schemaObj.resistance[rowId].cosF = cosF;
                     schemaObj.resistance[rowId].bazis = bazis;
@@ -822,17 +823,16 @@
                             result.x += schemaObj.resistance[rowId].x;
                             result.r0 += schemaObj.resistance[rowId].r0;
                             result.x0 += schemaObj.resistance[rowId].x0;
-                            if (schemaObj.elements[rowId].key == 'complex') {
-                                continue; 
-                            } else {
-                                if (schemaObj.resistance[rowId].r === null || schemaObj.resistance[rowId].x === null || !isFinite(schemaObj.resistance[rowId].r) || !isFinite(schemaObj.resistance[rowId].x) || (schemaObj.resistance[rowId].r == 0 && schemaObj.resistance[rowId].x == 0 && schemaObj.resistance[rowId].r0 == 0 && schemaObj.resistance[rowId].x0 == 0)) {
-                                    error.push(rowId);
-                                }
-                                if (kzIdkey == rowId) break;
+                            if (schemaObj.resistance[rowId].r === null || schemaObj.resistance[rowId].x === null || !isFinite(schemaObj.resistance[rowId].r) || !isFinite(schemaObj.resistance[rowId].x) || (schemaObj.resistance[rowId].r == 0 && schemaObj.resistance[rowId].x == 0 && schemaObj.resistance[rowId].r0 == 0 && schemaObj.resistance[rowId].x0 == 0)) {
+                                error.push(rowId);
                             }
+                            if (kzIdkey == rowId) break;
                         }
                         for (let rowId in schemaObj.resistance) { //Inverse
-                            if (rowId <= kzIdkey || schemaObj.elements[rowId].key == 'complex') {
+                            if (schemaObj.elements[rowId].key == 'complex' && schemaObj.resistanceStatus[rowId] == false) {
+                                error.push(rowId);
+                            }
+                            if (rowId <= kzIdkey || schemaObj.elements[rowId].key == 'complex') {   
                                 continue;
                             } else {
                                 resultInverse.r += schemaObj.resistance[rowId].r;
@@ -848,10 +848,10 @@
                     }
                     schemaObj.calc = calc;
                     schemaObj.calcInverse = calcInverse;
-                    console.log(schemaObj);
                     reportTokKz(error);
                 }
             }
+            console.log(schemaObj);
         }
 
         function calcTokKz(obj) {
@@ -881,10 +881,26 @@
                 obj.iudmin = Math.sqrt(2) * obj.ik3min * koefUd(obj.r + arcResistance, obj.x);
                 obj.ia0max = Math.sqrt(2) * obj.ik3max;
                 obj.ia0min = Math.sqrt(2) * obj.ik3min;
-                console.log([arcResistance, resistance.cosF, sinF, resistance.Eng, resistance.Z1ng, obj.r, obj.x, koefUd(obj.r, obj.x), koefUd(obj.r + arcResistance, obj.x)]);
             }
 
             return obj;
+        }
+
+        function getErrorItems(error) { 
+            error = error.sort(function(a, b) {
+                return a - b;
+            });
+            let result = error.filter(onlyUnique).join(', '); 
+            if (result.split(',').length > 1) {
+               result = 'участках ' + result; 
+            } else {
+                result = 'участке ' + result;
+            }
+            return result;
+        }
+
+        function onlyUnique(value, index, self) { 
+            return self.indexOf(value) === index;
         }
 
         function reportTokKz(error) {
@@ -896,8 +912,7 @@
                 customModal(textAddData);
             } else {
                 if (error.length > 0) {
-                    console.log(error);
-                    customModal(textResistanceIsNotDefined, error.filter((item, pos, ar) => ar.indexOf(item) === pos).join(', '));
+                    customModal(textResistanceIsNotDefined, getErrorItems(error));
                 } else {
                     let rowspan = 3
                     if (lastElement && lastElement.key == 'complex') {
@@ -960,7 +975,6 @@
                             });
                             index = index.join('');
                             let alert = '';
-                            console.log(schemaObj.resistance[lastElement.rowId].current);
                             if (schemaObj.resistance[lastElement.rowId].current < (10 * calc[pointKz].ik3max)) {
                                 alert = '<br><span class="text-danger">I<sub>' + index + '</sub> = ' + customRound(schemaObj.resistance[lastElement.rowId].current, 1) + 'А < ' + customRound(calc[pointKz].ik3max * 10, 1) + 'А (0,01 * I<sub>к.max</sub>), значит его можно не учитывать!</span>';
                             }
@@ -1031,13 +1045,17 @@
                         string += reportAvtomat(rowId, title);
                     } else if (schemaObj.elements[rowId].key == 'unique') {
                         string += reportUnique(rowId, title);
-                    }
+                    } else if (schemaObj.elements[rowId].key == 'complex') {
+                        string += reportComplex(rowId, title);
+                    } 
                     if (schemaObj.elements[rowId].key == 'complex') {
-                        continue; 
+                        if (schemaObj.resistanceStatus[rowId] == false) {
+                            error.push(rowId);
+                        }
                     } else {
                         if (schemaObj.resistance[rowId].r === null || schemaObj.resistance[rowId].x === null || !isFinite(schemaObj.resistance[rowId].r) || !isFinite(schemaObj.resistance[rowId].x) || (schemaObj.resistance[rowId].r == 0 && schemaObj.resistance[rowId].x == 0 && schemaObj.resistance[rowId].r0 == 0 && schemaObj.resistance[rowId].x0 == 0)) {
                             error.push(rowId);
-                        }
+                        }                        
                     }
                 }
                 string += reportCalcKz();
@@ -1047,8 +1065,7 @@
                     customModal(textAddPointKz);
                 } else {
                     if (error.length > 0) {
-                        console.log(error);
-                        customModal(textResistanceIsNotDefined, error.filter((item, pos, ar) => ar.indexOf(item) === pos).join(', '));
+                        customModal(textResistanceIsNotDefined, getErrorItems(error));
                     } else {
                         result(string);
                     }
@@ -1056,7 +1073,7 @@
             } else {
                 customModal(textAddEl);
             }
-        }        
+        }   
 
         function reportEnergySystem(rowId) {
             let string = '';
@@ -1218,11 +1235,44 @@
             return string;
         }
 
+        function reportComplex(rowId, title) {
+            let string = '';
+            let complexIndex = {'AD' : 'АД', 'LN' : 'ЛН', 'P' : 'П', 'EU' : 'ЭУ', 'LG' : 'ЛГ', };
+            let template = schemaObj.templates[rowId];
+            string += '<div class="area">';
+            string += '<h5><strong>' + title + ' на участке ' + rowId + ':</strong></h5>';
+            let indexArr = schemaObj.elements[rowId].name.split(" ");
+            let index = indexArr.map(function(item) {
+              return item[0].toUpperCase();
+            });
+            index = index.join('');
+            let str1 = '', str2 = '', str3 = '';
+            for (let i = 2; i < template.length; i++) {
+                let type = template[i].idItem.split('_');
+                str1 += 'P<sub>' + complexIndex[type[0]] + '</sub> = ' + template[i].valueItem + ' кВт;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                str2 += 'P<sub>&lowast;' + complexIndex[type[0]] + '</sub> = P<sub>' + complexIndex[type[0]] + '</sub> / P<sub>&sum;' + index + '</sub> = ' + template[i].valueItem + ' / ' + schemaObj.resistance[rowId].powerSum + ' = ' + customRound(template[i].valueItem/schemaObj.resistance[rowId].powerSum) + ';<br>';
+            }
+            string += str1 + '<br>';
+            string += str2;
+            string += 'Параметры комплексной нагрузки в относительных единицах определяем по кривым:<br>E&Prime;<sub>&lowast;НГ</sub> = ' + customRound(schemaObj.resistance[rowId].EngRel) + ';&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Z<sub>&lowast;1НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z1ngRel) + ';&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Z<sub>&lowast;2НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z2ngRel) + ';&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Z<sub>&lowast;0НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z0ngRel) + ';&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>';
+            string += 'Ток комплексной нагрузки:<br>';
+            string += '<table style="min-width: 375px;"><tr><td rowspan="2">I<sub>' + index + '</sub>&nbsp;=&nbsp;</td><td style="text-align:center;">P<sub>&sum;' + index + '</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">' + schemaObj.resistance[rowId].powerSum + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].current, 1) + ' А;</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; U<sub>нн</sub>  &times; cos&phi;</td><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; 0.4 &times; ' + schemaObj.resistance[rowId].cosF + '</td></tr></table>';
+            string += 'Базисное сопротивление:<br>';
+            string += '<table style="min-width: 345px;"><tr><td rowspan="2">Z<sub>б</sub>&nbsp;=&nbsp;</td><td style="text-align:center;">U<sub>б</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">380 &times; 10<sup>3</sup></td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' мОм;</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; I<sub>' + index + '</sub></td><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; ' + customRound(schemaObj.resistance[rowId].current, 1) + '</td></tr></table>';
+            string += 'Параметры комплексной нагрузки в именованых единицах:<br>';
+            string += 'E&Prime;<sub>НГ</sub> = E&Prime;<sub>&lowast;НГ</sub> &times; U<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].EngRel) + ' &times; 380 = ' + customRound(schemaObj.resistance[rowId].Eng, 1) + ' В;<br>';
+            string += 'Z<sub>1НГ</sub> = Z<sub>&lowast;1НГ</sub> &times; Z<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].Z1ngRel) + ' &times; ' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' = ' + customRound(schemaObj.resistance[rowId].Z1ng, 1) + ' мОм;<br>';
+            string += 'Z<sub>2НГ</sub> = Z<sub>&lowast;2НГ</sub> &times; Z<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].Z2ngRel) + ' &times; ' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' = ' + customRound(schemaObj.resistance[rowId].Z2ng, 1) + ' мОм;<br>';
+            string += 'Z<sub>0НГ</sub> = Z<sub>&lowast;0НГ</sub> &times; Z<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].Z0ngRel) + ' &times; ' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' = ' + customRound(schemaObj.resistance[rowId].Z0ng, 1) + ' мОм;<br>';
+            string += '</div>';
+            return string;
+        } 
+
         function reportCalcKz() {
             let string = '';
             for (let kzIdkey in schemaObj.kzId) {
                 string += '<div class="area">';
-                string += '<div class="area-result"><h3>Расчет для КЗ на участке ' + kzIdkey + ':</h3>';
+                string += '<div class="area-result"><h3>Расчет КЗ на участке ' + kzIdkey + ':</h3>';
                 string += '<h5><i>Суммарное сопротивление цепи</i>:</h5>';
                 let i = 0;
                 let formulaR = '';
@@ -1658,6 +1708,7 @@
         function changeElementComplex(elementId, rowId) {
             schemaObj.resistanceStatus[rowId] = false;
             schemaObj.resistance[rowId] = {
+                powerSum: null,
                 current: null,
                 cosF: null,
                 bazis: null,
