@@ -39,6 +39,28 @@
             unique: ''
         }
 
+        var systemSvg = '<img src=\"images/systemSvg.svg\" class=\"img-responsive\">';
+        var transformatorSvg = '<img src=\"images/transformatorSvg.svg\" class=\"img-responsive\">';
+        var hookupSvg = '<img src=\"images/hookupSvg.svg\" class=\"img-responsive\">';
+        var ttSvg = '<img src=\"images/ttSvg.svg\" class=\"img-responsive\">';
+        var klSvg = '<img src=\"images/klSvg.svg\" class=\"img-responsive\">';
+        var avtomatSvg = '<img src=\"images/avtomatSvg.svg\" class=\"img-responsive\">';
+        var kn = '<img src=\"images/kn.svg\" class=\"img-responsive\">';
+        var pointKzSvg = '<img src=\"images/pointKzSvg.svg\" class=\"img-responsive\">';
+
+        var reportSysSvg = '<img src=\"images/reportSysSvg.svg\" class=\"img-responsive\">';
+        var reportRSvg = '<img src=\"images/reportRSvg.svg\" class=\"img-responsive\">';
+        var reportRxSvg = '<img src=\"images/reportRxSvg.svg\" class=\"img-responsive\">';
+        var chartRXSvg = '<img src=\"images/chartRXSvg.svg\" class=\"img-responsive\">';
+        var chartXRSvg = '<img src=\"images/chartXRSvg.svg\" class=\"img-responsive\">';
+        var chart_AD_LN = '<img src=\"images/chart_AD_LN.svg\" class=\"img-responsive\">';
+        var chart_AD_P = '<img src=\"images/chart_AD_P.svg\" class=\"img-responsive\">';
+        var chart_AD_EU = '<img src=\"images/chart_AD_EU.svg\" class=\"img-responsive\">';
+        var chart_AD_LG = '<img src=\"images/chart_AD_LG.svg\" class=\"img-responsive\">';
+        var chart_AD_LN_P = '<img src=\"images/chart_AD_LN_P.svg\" class=\"img-responsive\">';
+        var chart_AD_LN_EU = '<img src=\"images/chart_AD_LN_EU.svg\" class=\"img-responsive\">';
+        var chart_LN_P_EU = '<img src=\"images/chart_LN_P_EU.svg\" class=\"img-responsive\">';
+
         var energySystemTemplate = [
             new InitTemplateItem('input', 'energySystemUvn', 'form-control w1', schemaObj.defaultVar.uvn, null, '<i>U</i><sub>с.ВН</sub> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' кВ', null),
             new InitTemplateItem('input', 'energySystemUnn', 'form-control w1', schemaObj.defaultVar.unn, null, '<i>U</i><sub>с.НН</sub> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' кВ', null),
@@ -327,7 +349,7 @@
             } else if (element == 'avtomat') {
                 img = avtomatSvg;
             } else if (element == 'complex') {
-                img = adLnPSvg;
+                img = kn;
             } else {
                 img = klSvg;
             }
@@ -832,13 +854,13 @@
                             if (schemaObj.elements[rowId].key == 'complex' && schemaObj.resistanceStatus[rowId] == false) {
                                 error.push(rowId);
                             }
-                            if (rowId <= kzIdkey || schemaObj.elements[rowId].key == 'complex') {   
+                            if (rowId <= kzIdkey || schemaObj.elements[rowId].key == 'complex') {
                                 continue;
                             } else {
                                 resultInverse.r += schemaObj.resistance[rowId].r;
                                 resultInverse.x += schemaObj.resistance[rowId].x;
                                 resultInverse.r0 += schemaObj.resistance[rowId].r0;
-                                resultInverse.x0 += schemaObj.resistance[rowId].x0;   
+                                resultInverse.x0 += schemaObj.resistance[rowId].x0;
                             }
                         }
                         calcTokKz(result);
@@ -886,20 +908,20 @@
             return obj;
         }
 
-        function getErrorItems(error) { 
-            error = error.sort(function(a, b) {
+        function getErrorItems(error) {
+            error = error.sort(function (a, b) {
                 return a - b;
             });
-            let result = error.filter(onlyUnique).join(', '); 
+            let result = error.filter(onlyUnique).join(', ');
             if (result.split(',').length > 1) {
-               result = 'участках ' + result; 
+                result = 'участках ' + result;
             } else {
                 result = 'участке ' + result;
             }
             return result;
         }
 
-        function onlyUnique(value, index, self) { 
+        function onlyUnique(value, index, self) {
             return self.indexOf(value) === index;
         }
 
@@ -916,7 +938,7 @@
                 } else {
                     let rowspan = 3
                     if (lastElement && lastElement.key == 'complex') {
-                        rowspan = rowspan + 2; 
+                        rowspan = rowspan + 2;
                     }
                     string += "<h3>Результаты расчета токов КЗ</h3>";
                     string += "<table class=\"table table-bordered text-center\">";
@@ -970,8 +992,8 @@
                             let ia0min = schemaObj.calcInverse[pointKz].ia0min;
                             let iudmin = schemaObj.calcInverse[pointKz].iudmin;
                             let indexArr = lastElement.name.split(" ");
-                            let index = indexArr.map(function(item) {
-                              return item[0].toUpperCase();
+                            let index = indexArr.map(function (item) {
+                                return item[0].toUpperCase();
                             });
                             index = index.join('');
                             let alert = '';
@@ -987,9 +1009,9 @@
                             string += "    <td>" + customRound(ik3min) + "</td>";
                             string += "    <td>" + customRound(ia0min) + "</td>";
                             string += "    <td>" + customRound(iudmin) + "</td>";
-                            string += "</tr>"; 
+                            string += "</tr>";
                             if (schemaObj.resistance[lastElement.rowId].current < (10 * calc[pointKz].ik3max)) {
-                            ik3max = ia0max = iudmax = ik3min = ia0min = iudmin = 0;
+                                ik3max = ia0max = iudmax = ik3min = ia0min = iudmin = 0;
                             }
                             string += "<tr>";
                             string += "    <td><strong>Суммарный:</strong></td>";
@@ -1000,8 +1022,8 @@
                             string += "    <td><strong>" + customRound(ik3min + calc[pointKz].ik3min) + "</strong></td>";
                             string += "    <td><strong>" + customRound(ia0min + calc[pointKz].ia0min) + "</strong></td>";
                             string += "    <td><strong>" + customRound(iudmin + calc[pointKz].iudmin) + "</strong></td>";
-                            string += "</tr>";  
-                        }                        
+                            string += "</tr>";
+                        }
                     }
                     string += "</tbody></table>";
                     result(string);
@@ -1047,7 +1069,7 @@
                         string += reportUnique(rowId, title);
                     } else if (schemaObj.elements[rowId].key == 'complex') {
                         string += reportComplex(rowId, title);
-                    } 
+                    }
                     if (schemaObj.elements[rowId].key == 'complex') {
                         if (schemaObj.resistanceStatus[rowId] == false) {
                             error.push(rowId);
@@ -1055,7 +1077,7 @@
                     } else {
                         if (schemaObj.resistance[rowId].r === null || schemaObj.resistance[rowId].x === null || !isFinite(schemaObj.resistance[rowId].r) || !isFinite(schemaObj.resistance[rowId].x) || (schemaObj.resistance[rowId].r == 0 && schemaObj.resistance[rowId].x == 0 && schemaObj.resistance[rowId].r0 == 0 && schemaObj.resistance[rowId].x0 == 0)) {
                             error.push(rowId);
-                        }                        
+                        }
                     }
                 }
                 string += reportCalcKz();
@@ -1073,7 +1095,7 @@
             } else {
                 customModal(textAddEl);
             }
-        }   
+        }
 
         function reportEnergySystem(rowId) {
             let string = '';
@@ -1237,20 +1259,20 @@
 
         function reportComplex(rowId, title) {
             let string = '';
-            let complexIndex = {'AD' : 'АД', 'LN' : 'ЛН', 'P' : 'П', 'EU' : 'ЭУ', 'LG' : 'ЛГ', };
+            let complexIndex = {'AD': 'АД', 'LN': 'ЛН', 'P': 'П', 'EU': 'ЭУ', 'LG': 'ЛГ',};
             let template = schemaObj.templates[rowId];
             string += '<div class="area">';
             string += '<h5><strong>' + title + ' на участке ' + rowId + ':</strong></h5>';
             let indexArr = schemaObj.elements[rowId].name.split(" ");
-            let index = indexArr.map(function(item) {
-              return item[0].toUpperCase();
+            let index = indexArr.map(function (item) {
+                return item[0].toUpperCase();
             });
             index = index.join('');
             let str1 = '', str2 = '', str3 = '';
             for (let i = 2; i < template.length; i++) {
                 let type = template[i].idItem.split('_');
                 str1 += 'P<sub>' + complexIndex[type[0]] + '</sub> = ' + template[i].valueItem + ' кВт;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-                str2 += 'P<sub>&lowast;' + complexIndex[type[0]] + '</sub> = P<sub>' + complexIndex[type[0]] + '</sub> / P<sub>&sum;' + index + '</sub> = ' + template[i].valueItem + ' / ' + schemaObj.resistance[rowId].powerSum + ' = ' + customRound(template[i].valueItem/schemaObj.resistance[rowId].powerSum) + ';<br>';
+                str2 += 'P<sub>&lowast;' + complexIndex[type[0]] + '</sub> = P<sub>' + complexIndex[type[0]] + '</sub> / P<sub>&sum;' + index + '</sub> = ' + template[i].valueItem + ' / ' + schemaObj.resistance[rowId].powerSum + ' = ' + customRound(template[i].valueItem / schemaObj.resistance[rowId].powerSum) + ';<br>';
             }
             string += str1 + '<br>';
             string += str2;
@@ -1262,19 +1284,19 @@
             string += 'Сопротивление обратной последовательности комплексной нагрузки:<br>';
             string += 'Z<sub>&lowast;2НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z2ngRel) + ';<br>';
             string += 'Сопротивление нулевой последовательности комплексной нагрузки:<br>';
-            string += 'Z<sub>&lowast;0НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z0ngRel) + ';<br>';
+            string += 'Z<sub>&lowast;0НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z0ngRel) + '.<br>';
             string += 'Ток комплексной нагрузки:<br>';
-            string += '<table style="min-width: 375px;"><tr><td rowspan="2">I<sub>' + index + '</sub>&nbsp;=&nbsp;</td><td style="text-align:center;">P<sub>&sum;' + index + '</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">' + schemaObj.resistance[rowId].powerSum + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].current, 1) + ' А;</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; U<sub>нн</sub>  &times; cos&phi;</td><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; 0.4 &times; ' + schemaObj.resistance[rowId].cosF + '</td></tr></table>';
+            string += '<table style="min-width: 380px;"><tr><td rowspan="2">I<sub>' + index + '</sub>&nbsp;=&nbsp;</td><td style="text-align:center;">P<sub>&sum;' + index + '</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">' + schemaObj.resistance[rowId].powerSum + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].current, 1) + ' А.</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; U<sub>нн</sub>  &times; cos&phi;</td><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; 0.4 &times; ' + schemaObj.resistance[rowId].cosF + '</td></tr></table>';
             string += 'Базисное сопротивление:<br>';
-            string += '<table style="min-width: 345px;"><tr><td rowspan="2">Z<sub>б</sub>&nbsp;=&nbsp;</td><td style="text-align:center;">U<sub>б</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">380 &times; 10<sup>3</sup></td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' мОм;</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; I<sub>' + index + '</sub></td><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; ' + customRound(schemaObj.resistance[rowId].current, 1) + '</td></tr></table>';
+            string += '<table style="min-width: 345px;"><tr><td rowspan="2">Z<sub>б</sub>&nbsp;=&nbsp;</td><td style="text-align:center;">U<sub>б</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">380 &times; 10<sup>3</sup></td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' мОм.</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; I<sub>' + index + '</sub></td><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; ' + customRound(schemaObj.resistance[rowId].current, 1) + '</td></tr></table>';
             string += 'Параметры комплексной нагрузки в именованых единицах:<br>';
             string += 'E&Prime;<sub>НГ</sub> = E&Prime;<sub>&lowast;НГ</sub> &times; U<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].EngRel) + ' &times; 380 = ' + customRound(schemaObj.resistance[rowId].Eng, 1) + ' В;<br>';
             string += 'Z<sub>1НГ</sub> = Z<sub>&lowast;1НГ</sub> &times; Z<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].Z1ngRel) + ' &times; ' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' = ' + customRound(schemaObj.resistance[rowId].Z1ng, 1) + ' мОм;<br>';
             string += 'Z<sub>2НГ</sub> = Z<sub>&lowast;2НГ</sub> &times; Z<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].Z2ngRel) + ' &times; ' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' = ' + customRound(schemaObj.resistance[rowId].Z2ng, 1) + ' мОм;<br>';
-            string += 'Z<sub>0НГ</sub> = Z<sub>&lowast;0НГ</sub> &times; Z<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].Z0ngRel) + ' &times; ' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' = ' + customRound(schemaObj.resistance[rowId].Z0ng, 1) + ' мОм;<br>';
+            string += 'Z<sub>0НГ</sub> = Z<sub>&lowast;0НГ</sub> &times; Z<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].Z0ngRel) + ' &times; ' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' = ' + customRound(schemaObj.resistance[rowId].Z0ng, 1) + ' мОм.<br>';
             string += '</div>';
             return string;
-        } 
+        }
 
         function reportCalcKz() {
             let string = '';
@@ -1406,10 +1428,10 @@
             string += '<div class="row"><a name="koeff"></a>';
             string += '    <div class="col-xs-12 img-responsive">';
             string += '    <br><br><h4>Кривые зависимости ударного коэффициента от отношений R/X и X/R</h4>';
-            string += koefRXSvg;
+            string += chartRXSvg;
             string += '    </div>';
             string += '    <div class="col-xs-12 img-responsive"><br>';
-            string += koefXRSvg;
+            string += chartXRSvg;
             string += '    </div>';
             string += '</div>';
             return string;
@@ -1751,11 +1773,11 @@
                     classItem: 'form-control w1',
                     valueItem: '',
                     textItem: null,
-                    labelItem: htmlEncode('<i>' + complexTitle[titleArray[i]] + '</i> = '),
+                    labelItem: htmlEncode('<i>' + complexTitle[titleArray[i]] + '</i> =&nbsp;'),
                     functionItem: 'changeElementValue',
                     wrapperItemStart: htmlEncode('<div class=\"form-group\">'),
                     wrapperItemEnd: htmlEncode('</div>'),
-                    suffixItem: 'кВт',
+                    suffixItem: ' кВт',
                     outerData: null
                 }
                 schemaObj.templates[rowId].push(complexTemplateLoc);
