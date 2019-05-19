@@ -39,18 +39,22 @@
             unique: ''
         }
 
-        var systemSvg = '<img src=\"images/systemSvg.svg\" class=\"img-responsive\">';
-        var transformatorSvg = '<img src=\"images/transformatorSvg.svg\" class=\"img-responsive\">';
-        var hookupSvg = '<img src=\"images/hookupSvg.svg\" class=\"img-responsive\">';
-        var ttSvg = '<img src=\"images/ttSvg.svg\" class=\"img-responsive\">';
-        var klSvg = '<img src=\"images/klSvg.svg\" class=\"img-responsive\">';
-        var avtomatSvg = '<img src=\"images/avtomatSvg.svg\" class=\"img-responsive\">';
-        var kn = '<img src=\"images/kn.svg\" class=\"img-responsive\">';
-        var pointKzSvg = '<img src=\"images/pointKzSvg.svg\" class=\"img-responsive\">';
+        var systemSvg = '<img src=\"images/systemSvg.svg\">';
+        var transformatorSvg = '<img src=\"images/transformatorSvg.svg\">';
+        var hookupSvg = '<img src=\"images/hookupSvg.svg\">';
+        var ttSvg = '<img src=\"images/ttSvg.svg\">';
+        var klSvg = '<img src=\"images/klSvg.svg\">';
+        var avtomatSvg = '<img src=\"images/avtomatSvg.svg\">';
+        var shinoprovodSvg = '<img src=\"images/shinoprovodSvg.svg\">';
+        var uniqueSvg = '<img src=\"images/uniqueSvg.svg\">';
+        var knSvg = '<img src=\"images/knSvg.svg\">';
+        var pointKzSvg = '<img src=\"images/pointKzSvg.svg\">';
 
-        var reportSysSvg = '<img src=\"images/reportSysSvg.svg\" class=\"img-responsive\">';
-        var reportRSvg = '<img src=\"images/reportRSvg.svg\" class=\"img-responsive\">';
-        var reportRxSvg = '<img src=\"images/reportRxSvg.svg\" class=\"img-responsive\">';
+        var reportSysSvg = '<img src=\"images/reportSysSvg.svg\">';
+        var reportRSvg = '<img src=\"images/reportRSvg.svg\">';
+        var reportRxSvg = '<img src=\"images/reportRxSvg.svg\">';
+        var reportComplexSvg = '<img src=\"images/reportComplexSvg.svg\">';
+
         var chartRXSvg = '<img src=\"images/chartRXSvg.svg\" class=\"img-responsive\">';
         var chartXRSvg = '<img src=\"images/chartXRSvg.svg\" class=\"img-responsive\">';
         var chart_AD_LN = '<img src=\"images/chart_AD_LN.svg\" class=\"img-responsive\">';
@@ -60,6 +64,16 @@
         var chart_AD_LN_P = '<img src=\"images/chart_AD_LN_P.svg\" class=\"img-responsive\">';
         var chart_AD_LN_EU = '<img src=\"images/chart_AD_LN_EU.svg\" class=\"img-responsive\">';
         var chart_LN_P_EU = '<img src=\"images/chart_LN_P_EU.svg\" class=\"img-responsive\">';
+
+        var chartComplex ={
+            AD_LN: chart_AD_LN,
+            AD_P: chart_AD_P,
+            AD_EU: chart_AD_EU,
+            AD_LG: chart_AD_LG,
+            AD_LN_P: chart_AD_LN_P,
+            AD_LN_EU: chart_AD_LN_EU,
+            LN_P_EU: chart_LN_P_EU
+        }
 
         var energySystemTemplate = [
             new InitTemplateItem('input', 'energySystemUvn', 'form-control w1', schemaObj.defaultVar.uvn, null, '<i>U</i><sub>с.ВН</sub> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' кВ', null),
@@ -341,15 +355,17 @@
             } else if (element == 'kabelVn' || element == 'kabelNn') {
                 img = klSvg;
             } else if (element == 'shinoprovod') {
-                img = klSvg;
+                img = shinoprovodSvg;
             } else if (element == 'hookup') {
                 img = hookupSvg;
             } else if (element == 'tt') {
                 img = ttSvg;
             } else if (element == 'avtomat') {
                 img = avtomatSvg;
+            } else if (element == 'unique') {
+                img = uniqueSvg;
             } else if (element == 'complex') {
-                img = kn;
+                img = knSvg;
             } else {
                 img = klSvg;
             }
@@ -754,26 +770,27 @@
             if (schemaObj.elements[rowId].key == 'complex') {
                 if (schemaObj.resistanceStatus[rowId] != false) {
                     if (schemaObj.resistance[rowId].Z1ng !== 0 && schemaObj.resistance[rowId].Z1ng !== null) {
-                        html += 'E&Prime;<sub>нг</sub>=' + customRound(schemaObj.resistance[rowId].Eng, 1) + ' В<br>';
                         html += 'Z<sub>1нг</sub>=' + customRound(schemaObj.resistance[rowId].Z1ng, 1) + ' мОм<br>';
                         html += 'Z<sub>2нг</sub>=' + customRound(schemaObj.resistance[rowId].Z2ng, 1) + ' мОм<br>';
                         html += 'Z<sub>0нг</sub>=' + customRound(schemaObj.resistance[rowId].Z0ng, 1) + ' мОм<br>';
+                        html += 'E&Prime;<sub>нг</sub>=' + customRound(schemaObj.resistance[rowId].Eng, 1) + ' В<br>';
                     }
                 }
             } else {
                 if (schemaObj.resistanceStatus[rowId] != false) {
-                    if (schemaObj.resistance[rowId].r !== 0 && schemaObj.resistance[rowId].r !== null) {
-                        html += 'R<sub>' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].r) + ' мОм<br>';
-                    }
                     if (schemaObj.resistance[rowId].x !== 0 && schemaObj.resistance[rowId].x !== null) {
                         html += 'X<sub>' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].x) + ' мОм<br>';
+                    }
+                    if (schemaObj.resistance[rowId].x0 !== 0 && schemaObj.resistance[rowId].x0 !== null) {
+                        html += 'X<sub>0' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].x0) + ' мОм<br>';
+                    }
+                    if (schemaObj.resistance[rowId].r !== 0 && schemaObj.resistance[rowId].r !== null) {
+                        html += 'R<sub>' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].r) + ' мОм<br>';
                     }
                     if (schemaObj.resistance[rowId].r0 !== 0 && schemaObj.resistance[rowId].r0 !== null) {
                         html += 'R<sub>0' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].r0) + ' мОм<br>';
                     }
-                    if (schemaObj.resistance[rowId].x0 !== 0 && schemaObj.resistance[rowId].x0 !== null) {
-                        html += 'X<sub>0' + symbol[schemaObj.elements[rowId].key] + '</sub>=' + customRound(schemaObj.resistance[rowId].x0) + ' мОм';
-                    }
+
                 }
             }
             html += '</span>';
@@ -1276,7 +1293,7 @@
             }
             string += str1 + '<br>';
             string += str2;
-            string += 'Параметры комплексной нагрузки в относительных единицах определяем по кривым<br>';
+            string += 'Параметры комплексной нагрузки в относительных единицах определяем по <a href="#chart">кривым</a>.<br>';
             string += 'Эквивалентная сверхпереходная ЭДС:<br>';
             string += 'E&Prime;<sub>&lowast;НГ</sub> = ' + customRound(schemaObj.resistance[rowId].EngRel) + ';<br>';
             string += 'Сопротивление прямой последовательности комплексной нагрузки:<br>';
@@ -1388,6 +1405,8 @@
 
         function reportSchema() {
             let string = '';
+            let ifComplex = false;
+            let chart = '';
             for (let rowId in schemaObj.elements) {
                 let title = '';
                 if (schemaObj.elements[rowId].title !== null) {
@@ -1408,6 +1427,10 @@
                     img = reportSysSvg;
                 } else if (schemaObj.elements[rowId].key == 'hookup') {
                     img = reportRSvg;
+                } else if (schemaObj.elements[rowId].key == 'complex') {
+                    img = reportComplexSvg;
+                    ifComplex = true;
+                    chart = chartComplex[schemaObj.templates[rowId][0].valueItem];
                 } else {
                     img = reportRxSvg;
                 }
@@ -1427,13 +1450,21 @@
             }
             string += '<div class="row"><a name="koeff"></a>';
             string += '    <div class="col-xs-12 img-responsive">';
-            string += '    <br><br><h4>Кривые зависимости ударного коэффициента от отношений R/X и X/R</h4>';
+            string += '    <br><br><h4>Кривые зависимости ударного коэффициента от отношений R/X и X/R:</h4>';
             string += chartRXSvg;
             string += '    </div>';
             string += '    <div class="col-xs-12 img-responsive"><br>';
             string += chartXRSvg;
             string += '    </div>';
             string += '</div>';
+            if (ifComplex == true) {
+                string += '<div class="row"><a name="chart"></a>';
+                string += '    <div class="col-xs-12 img-responsive">';
+                string += '    <br><br><h4>Зависимость параметров комплексной нагрузки Z<sub>1нг</sub>, Z<sub>2нг</sub>, Z<sub>0нг</sub>, E<sub>нг</sub> от её состава:</h4>';
+                string += chart;
+                string += '    </div>';
+                string += '</div>';
+            }
             return string;
         }
 
