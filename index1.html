@@ -23,7 +23,7 @@
                 uvn: 6.3,
                 ikz: "",
                 arcResistance: 5,
-                complexCosPphi: 0.8
+                cosPphi: 0.8
             }
         };
 
@@ -36,7 +36,10 @@
             hookup: 'к',
             tt: 'TA',
             avtomat: 'кв',
-            unique: ''
+            unique: '',
+            сomplex: 'КН',
+            ad: 'АД',
+            sd: 'СД'
         }
 
         var systemSvg = '<img src=\"images/systemSvg.svg\">';
@@ -48,12 +51,23 @@
         var shinoprovodSvg = '<img src=\"images/shinoprovodSvg.svg\">';
         var uniqueSvg = '<img src=\"images/uniqueSvg.svg\">';
         var knSvg = '<img src=\"images/knSvg.svg\">';
+        var adSvg = '<img src=\"images/knSvg.svg\">';
         var pointKzSvg = '<img src=\"images/pointKzSvg.svg\">';
+
+        var ad_ln_Svg = '<img src=\"images/ad_ln.svg\">';
+        var ad_p_Svg = '<img src=\"images/ad_p.svg\">';
+        var ad_eu_Svg = '<img src=\"images/ad_eu.svg\">';
+        var ad_lg_Svg = '<img src=\"images/ad_lg.svg\">';
+        var ad_ln_p_Svg = '<img src=\"images/ad_ln_p.svg\">';
+        var ad_ln_eu_Svg = '<img src=\"images/ad_ln_eu.svg\">';
+        var ln_p_eu_Svg = '<img src=\"images/ln_p_eu.svg\">'; 
 
         var reportSysSvg = '<img src=\"images/reportSysSvg.svg\">';
         var reportRSvg = '<img src=\"images/reportRSvg.svg\">';
         var reportRxSvg = '<img src=\"images/reportRxSvg.svg\">';
+        var reportXSvg = '<img src=\"images/reportXSvg.svg\">';
         var reportComplexSvg = '<img src=\"images/reportComplexSvg.svg\">';
+        var reportAdSvg = '<img src=\"images/reportAdSvg.svg\">';
 
         var chartRXSvg = '<img src=\"images/chartRXSvg.svg\" class=\"img-responsive\">';
         var chartXRSvg = '<img src=\"images/chartXRSvg.svg\" class=\"img-responsive\">';
@@ -118,7 +132,21 @@
 
         var complexTemplate = [
             new InitTemplateItem('select', 'complexSelector', 'form-control w2', null, null, '<i>Состав потребителей </i> =&nbsp;', 'changeElementComplex', '<div class=\"form-group\">', '</div>', '', 'complexArray'),
-            new InitTemplateItem('input', 'complexCosF', 'form-control w1', schemaObj.defaultVar.complexCosPphi, null, '<i>cos&phi; </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
+            new InitTemplateItem('input', 'complexCosF', 'form-control w1', schemaObj.defaultVar.cosPphi, null, '<i>cos&phi; </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
+        ];
+
+        var adTemplate = [
+            new InitTemplateItem('input', 'power', 'form-control w1', null, null, '<i>Мощность </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' кВт', null),
+            new InitTemplateItem('input', 'CosF', 'form-control w1', null, null, '<i>cos&phi; </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
+            new InitTemplateItem('input', 'kpd', 'form-control w1', null, null, '<i>КПД &eta; </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' %', null),
+            new InitTemplateItem('input', 'sNom', 'form-control w1', null, null, '<i>Скольжение  s<sub>ном</sub></i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' %', null),
+            new InitTemplateItem('input', 'iPuskToINom', 'form-control w1', null, null, '<i>I<sub>пуск</sub> / I<sub>ном</sub> </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
+            new InitTemplateItem('input', 'mPuskToMNom', 'form-control w1', null, null, '<i>M<sub>пуск</sub> / M<sub>ном</sub> </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
+            new InitTemplateItem('input', 'mMaxToMNom', 'form-control w1', null, null, '<i>M<sub>max</sub> / M<sub>ном</sub> </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
+            new InitTemplateItem('input', 'mMinToMNom', 'form-control w1', null, null, '<i>M<sub>min</sub> / M<sub>ном</sub> </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
+        ];
+
+        var sdTemplate = [
         ];
 
         var energySystemResistance = {r: null, x: null, r0: null, x0: null};
@@ -144,6 +172,8 @@
             Z2ng: null,
             Z0ng: null
         };
+        var adResistance = {r: null, x: null, r0: null, x0: null};
+        var sdResistance = {r: null, x: null, r0: null, x0: null};
 
         var energySystemObj = new ElementsDataObj('energySystem', 'Энергосистема', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
         var transformatorObj = new ElementsDataObj('transformator', 'Трансформатор', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
@@ -155,7 +185,8 @@
         var avtomatObj = new ElementsDataObj('avtomat', 'Автоматический выключатель', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
         var uniqueObj = new ElementsDataObj('unique', 'Свой элемент', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
         var complexObj = new ElementsDataObj('complex', 'Комплексная нагрузка', null, null, null, '<div class=\"form-inline\">{tpl}</div>', 2, 'complex-data');
-
+        var adObj = new ElementsDataObj('ad', 'Асинхронный двигатель', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
+        var sdObj = new ElementsDataObj('ad', 'Синхронный двигатель', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
 
         var elementObj = {
             energySystem: energySystemObj,
@@ -168,6 +199,8 @@
             avtomat: avtomatObj,
             unique: uniqueObj,
             complex: complexObj,
+            ad: adObj,
+            sd: sdObj,
         };
 
         var templateObj = {
@@ -181,6 +214,8 @@
             avtomat: avtomatTemplate,
             unique: uniqueTemplate,
             complex: complexTemplate,
+            ad: adTemplate,
+            sd: sdTemplate,
         };
 
         var resistanceObj = {
@@ -194,6 +229,8 @@
             avtomat: avtomatResistance,
             unique: uniqueResistance,
             complex: complexResistance,
+            ad: adResistance,
+            sd: sdResistance,
         };
 
         var textSelectEl = '<p class=\"text-danger\">Выберите элемент сети!</p>';
@@ -382,7 +419,7 @@
             html += '<div id=\"' + element + 'Img' + rowId + '\" class=\"' + element + 'Img' + pointKz + '\">';
             html += '   <div id=\"' + element + 'Resistance' + rowId + '\" class=\"resistanceData\">' + resistanceData + '</div>';
             html += '   <div id=\"pointKzWrapper' + rowId + '\" class=\"pointKzWrapper\">' + pointKzImg + '</div>';
-            html += img;
+            html += '   <div id=\"' + element + 'Svg' + rowId + '\">' + img + '</div>';
             html += '</div>';
             return html;
         }
@@ -390,7 +427,7 @@
         function renderItemPointKz(element, rowId, pointKz) {
             let html = '';
             let checked = '';
-            if (element != 'complex' && element != 'energySystem') {
+            if (element != 'complex' && element != 'energySystem' && element != 'ad' && element != 'sd') {
                 if (pointKz === undefined) {
                     pointKz = null;
                 }
@@ -434,7 +471,7 @@
             let elementSelect = document.getElementById("elementSelect").value;
             if (elementSelect != '') {
                 let lastElement = lastElementObj(schemaObj.elements);
-                if (lastElement && lastElement.key == 'complex') {
+                if ((lastElement && lastElement.key == 'complex') || (lastElement && lastElement.key == 'ad') || (lastElement && lastElement.key == 'sd')) {
                     customModal(textLastEl, lastElement.name);
                 } else {
                     let html = "";
@@ -498,6 +535,29 @@
             schemaObj.elements[rowId].title = elementValue.replace(/[\\\|\'\"\#^\:\;\\$\%\&\?\/]/g, '');
         }
 
+        function changeElementImg(rowId, elSelectValue) {
+            let elementImg = document.getElementById('complexSvg' + rowId);
+            let img;
+            if (elSelectValue == '' || elSelectValue === null || elSelectValue === undefined) {
+                img = knSvg;
+            } else if (elSelectValue == 'AD_LN') {
+                img = ad_ln_Svg; 
+            } else if (elSelectValue == 'AD_P') {
+                img = ad_p_Svg;
+            } else if (elSelectValue == 'AD_EU') {
+                img = ad_eu_Svg; 
+            } else if (elSelectValue == 'AD_LG') {
+                img = ad_lg_Svg;
+            } else if (elSelectValue == 'AD_LN_P') {
+                img = ad_ln_p_Svg; 
+            } else if (elSelectValue == 'AD_LN_EU') {
+                img = ad_ln_eu_Svg;
+            } else if (elSelectValue == 'LN_P_EU') {
+                img = ln_p_eu_Svg; 
+            }
+            elementImg.innerHTML = img;
+        }
+
         function changeCheckbox(elementId, rowId) {
             let checkbox = document.getElementById(elementId);
             let img = document.getElementById(elementId.replace('Checkbox', 'Img'));
@@ -535,7 +595,11 @@
                 resistance = calcResistanceUnique(rowId, template);
             } else if (element.key == 'complex') {
                 resistance = calcResistanceComplex(rowId, template);
-            }
+            } else if (element.key == 'ad') {
+                resistance = calcResistanceAd(rowId, template);
+            } else if (element.key == 'sd') {
+                resistance = calcResistanceSd(rowId, template);
+            }            
             if (element.key != 'complex') {
                 schemaObj.resistance[rowId].r = resistance[0]; //r
                 schemaObj.resistance[rowId].x = resistance[1];  //x
@@ -730,6 +794,14 @@
             }
         }
 
+        function calcResistanceAd(rowId, template) {
+
+        }
+
+        function calcResistanceSd(rowId, template) {
+
+        }
+
         function getKoef(power, obj) {
             let result;
             if (typeof obj == "object") {
@@ -776,6 +848,10 @@
                         html += 'E&Prime;<sub>нг</sub>=' + customRound(schemaObj.resistance[rowId].Eng, 1) + ' В<br>';
                     }
                 }
+            } else if (schemaObj.elements[rowId].key == 'ad') {
+
+            } else if (schemaObj.elements[rowId].key == 'sd') {
+
             } else {
                 if (schemaObj.resistanceStatus[rowId] != false) {
                     if (schemaObj.resistance[rowId].x !== 0 && schemaObj.resistance[rowId].x !== null) {
@@ -920,6 +996,10 @@
                 obj.iudmin = Math.sqrt(2) * obj.ik3min * koefUd(obj.r + arcResistance, obj.x);
                 obj.ia0max = Math.sqrt(2) * obj.ik3max;
                 obj.ia0min = Math.sqrt(2) * obj.ik3min;
+            } else if (lastElement && lastElement.key == 'ad') {
+
+            } else if (lastElement && lastElement.key == 'sd') {
+
             }
 
             return obj;
@@ -1295,13 +1375,13 @@
             string += str2;
             string += 'Параметры комплексной нагрузки в относительных единицах определяем по <a href="#chart">кривым</a>.<br>';
             string += 'Эквивалентная сверхпереходная ЭДС:<br>';
-            string += 'E&Prime;<sub>&lowast;НГ</sub> = ' + customRound(schemaObj.resistance[rowId].EngRel) + ';<br>';
+            string += 'E&Prime;<sub>&lowast;НГ</sub> = ' + customRound(schemaObj.resistance[rowId].EngRel) + '<br>';
             string += 'Сопротивление прямой последовательности комплексной нагрузки:<br>';
-            string += 'Z<sub>&lowast;1НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z1ngRel) + ';<br>';
+            string += 'Z<sub>&lowast;1НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z1ngRel) + '<br>';
             string += 'Сопротивление обратной последовательности комплексной нагрузки:<br>';
-            string += 'Z<sub>&lowast;2НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z2ngRel) + ';<br>';
+            string += 'Z<sub>&lowast;2НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z2ngRel) + '<br>';
             string += 'Сопротивление нулевой последовательности комплексной нагрузки:<br>';
-            string += 'Z<sub>&lowast;0НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z0ngRel) + '.<br>';
+            string += 'Z<sub>&lowast;0НГ</sub> = ' + customRound(schemaObj.resistance[rowId].Z0ngRel) + '<br>';
             string += 'Ток комплексной нагрузки:<br>';
             string += '<table style="min-width: 380px;"><tr><td rowspan="2">I<sub>' + index + '</sub>&nbsp;=&nbsp;</td><td style="text-align:center;">P<sub>&sum;' + index + '</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">' + schemaObj.resistance[rowId].powerSum + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].current, 1) + ' А.</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; U<sub>нн</sub>  &times; cos&phi;</td><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; 0.4 &times; ' + schemaObj.resistance[rowId].cosF + '</td></tr></table>';
             string += 'Базисное сопротивление:<br>';
@@ -1677,6 +1757,7 @@
             let arcSelectVar = document.getElementById("arcSelect");
             let arcInputVar = document.getElementById("arcInput");
             let html = '';
+            let complex = [];
             if (loadedObject !== null) {
                 schemaObj = JSON.parse(loadedObject);
                 arcInputVar.value = schemaObj.defaultVar.arcResistance;
@@ -1701,13 +1782,18 @@
                     html += "   <td id=\"pointKz" + rowId + "\" class=\"elementPointKz\">" + renderItemPointKz(schemaObj.elements[rowId].key, rowId, schemaObj.elements[rowId].pointKz) + "</td>";
                     html += "   <td><input type=\"button\" value=\"Удалить\" class=\"delete btn btn-danger\" onclick=\"deleteRow(" + rowId + ")\"></td>";
                     html += "</tr>";
-
+                    if (schemaObj.elements[rowId].key == 'complex') {
+                        complex = [rowId, schemaObj.templates[rowId][0].valueItem];
+                    }
                 }
                 html += "<tr class=\"table-row\"><td class=\"selector\"><select id=\"elementSelect\" class=\"form-control\" name=\"elementSelect\">";
                 html += addElementsSelect();
                 html += "</select></td><td class=\"elementScheme\"></td><td class=\"elementData\"></td><td class=\"elementPointKz\"></td><td class=\"rowAddDel\"><input type=\"button\" class=\"add btn btn-success\" onclick=\"addRow(schemaObj);\" value=\"Добавить\"></td></tr>";
             }
             tbody.innerHTML = html;
+            if (schemaObj.elements[rowId].key == 'complex') {
+            changeElementImg(complex[0],complex[1]);
+            }
         }
 
         function customRound(num, digit) {
@@ -1789,8 +1875,9 @@
                 addResistance(rowId);
             } else {
                 renderTemplComplex(elSelectValue, rowId);
-                changeElementValue(elementId, rowId);
+                changeElementValue(elementId, rowId);   
             }
+            changeElementImg(rowId, elSelectValue);
         }
 
         function renderTemplComplex(elSelectValue, rowId) {
