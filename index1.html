@@ -51,7 +51,7 @@
         var shinoprovodSvg = '<img src=\"images/shinoprovodSvg.svg\">';
         var uniqueSvg = '<img src=\"images/uniqueSvg.svg\">';
         var knSvg = '<img src=\"images/knSvg.svg\">';
-        var adSvg = '<img src=\"images/knSvg.svg\">';
+        var adSvg = '<img src=\"images/adSvg.svg\">';
         var pointKzSvg = '<img src=\"images/pointKzSvg.svg\">';
 
         var ad_ln_Svg = '<img src=\"images/ad_ln.svg\">';
@@ -60,7 +60,7 @@
         var ad_lg_Svg = '<img src=\"images/ad_lg.svg\">';
         var ad_ln_p_Svg = '<img src=\"images/ad_ln_p.svg\">';
         var ad_ln_eu_Svg = '<img src=\"images/ad_ln_eu.svg\">';
-        var ln_p_eu_Svg = '<img src=\"images/ln_p_eu.svg\">'; 
+        var ln_p_eu_Svg = '<img src=\"images/ln_p_eu.svg\">';
 
         var reportSysSvg = '<img src=\"images/reportSysSvg.svg\">';
         var reportRSvg = '<img src=\"images/reportRSvg.svg\">';
@@ -79,7 +79,7 @@
         var chart_AD_LN_EU = '<img src=\"images/chart_AD_LN_EU.svg\" class=\"img-responsive\">';
         var chart_LN_P_EU = '<img src=\"images/chart_LN_P_EU.svg\" class=\"img-responsive\">';
 
-        var chartComplex ={
+        var chartComplex = {
             AD_LN: chart_AD_LN,
             AD_P: chart_AD_P,
             AD_EU: chart_AD_EU,
@@ -146,8 +146,7 @@
             new InitTemplateItem('input', 'mMinToMNom', 'form-control w1', null, null, '<i>M<sub>min</sub> / M<sub>ном</sub> </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
         ];
 
-        var sdTemplate = [
-        ];
+        var sdTemplate = [];
 
         var energySystemResistance = {r: null, x: null, r0: null, x0: null};
         var transformatorResistance = {r: null, x: null, r0: null, x0: null};
@@ -186,7 +185,7 @@
         var uniqueObj = new ElementsDataObj('unique', 'Свой элемент', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
         var complexObj = new ElementsDataObj('complex', 'Комплексная нагрузка', null, null, null, '<div class=\"form-inline\">{tpl}</div>', 2, 'complex-data');
         var adObj = new ElementsDataObj('ad', 'Асинхронный двигатель', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
-        var sdObj = new ElementsDataObj('ad', 'Синхронный двигатель', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
+        var sdObj = new ElementsDataObj('sd', 'Синхронный двигатель', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
 
         var elementObj = {
             energySystem: energySystemObj,
@@ -403,6 +402,8 @@
                 img = uniqueSvg;
             } else if (element == 'complex') {
                 img = knSvg;
+            } else if (element == 'ad' || element == 'sd') {
+                img = adSvg;
             } else {
                 img = klSvg;
             }
@@ -541,19 +542,19 @@
             if (elSelectValue == '' || elSelectValue === null || elSelectValue === undefined) {
                 img = knSvg;
             } else if (elSelectValue == 'AD_LN') {
-                img = ad_ln_Svg; 
+                img = ad_ln_Svg;
             } else if (elSelectValue == 'AD_P') {
                 img = ad_p_Svg;
             } else if (elSelectValue == 'AD_EU') {
-                img = ad_eu_Svg; 
+                img = ad_eu_Svg;
             } else if (elSelectValue == 'AD_LG') {
                 img = ad_lg_Svg;
             } else if (elSelectValue == 'AD_LN_P') {
-                img = ad_ln_p_Svg; 
+                img = ad_ln_p_Svg;
             } else if (elSelectValue == 'AD_LN_EU') {
                 img = ad_ln_eu_Svg;
             } else if (elSelectValue == 'LN_P_EU') {
-                img = ln_p_eu_Svg; 
+                img = ln_p_eu_Svg;
             }
             elementImg.innerHTML = img;
         }
@@ -599,7 +600,7 @@
                 resistance = calcResistanceAd(rowId, template);
             } else if (element.key == 'sd') {
                 resistance = calcResistanceSd(rowId, template);
-            }            
+            }
             if (element.key != 'complex') {
                 schemaObj.resistance[rowId].r = resistance[0]; //r
                 schemaObj.resistance[rowId].x = resistance[1];  //x
@@ -1792,7 +1793,7 @@
             }
             tbody.innerHTML = html;
             if (schemaObj.elements[rowId].key == 'complex') {
-            changeElementImg(complex[0],complex[1]);
+                changeElementImg(complex[0], complex[1]);
             }
         }
 
@@ -1875,7 +1876,7 @@
                 addResistance(rowId);
             } else {
                 renderTemplComplex(elSelectValue, rowId);
-                changeElementValue(elementId, rowId);   
+                changeElementValue(elementId, rowId);
             }
             changeElementImg(rowId, elSelectValue);
         }
