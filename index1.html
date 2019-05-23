@@ -23,7 +23,7 @@
                 uvn: 6.3,
                 ikz: "",
                 arcResistance: 5,
-                cosPphi: 0.8
+                cosPphi: 0.9
             }
         };
 
@@ -89,6 +89,16 @@
             LN_P_EU: chart_LN_P_EU
         }
 
+        var cosPphiComplex ={
+            AD_LN: 0.9,
+            AD_P: 0.85,
+            AD_EU: 0.85,
+            AD_LG: 0.82,
+            AD_LN_P: 0.9,
+            AD_LN_EU: 0.9,
+            LN_P_EU: 0.9
+        }
+
         var energySystemTemplate = [
             new InitTemplateItem('input', 'energySystemUvn', 'form-control w1', schemaObj.defaultVar.uvn, null, '<i>U</i><sub>с.ВН</sub> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' кВ', null),
             new InitTemplateItem('input', 'energySystemUnn', 'form-control w1', schemaObj.defaultVar.unn, null, '<i>U</i><sub>с.НН</sub> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' кВ', null),
@@ -147,6 +157,12 @@
         ];
 
         var sdTemplate = [
+            new InitTemplateItem('input', 'power', 'form-control w1', null, null, '<i>Мощность </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' кВт', null),
+            new InitTemplateItem('input', 'CosF', 'form-control w1', null, null, '<i>cos&phi; </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
+            new InitTemplateItem('input', 'kpd', 'form-control w1', null, null, '<i>КПД &eta; </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' %', null),
+            new InitTemplateItem('input', 'iPuskToINom', 'form-control w1', null, null, '<i>I<sub>пуск</sub> / I<sub>ном</sub> </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
+            new InitTemplateItem('input', 'mPuskToMNom', 'form-control w1', null, null, '<i>M<sub>пуск</sub> / M<sub>ном</sub> </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
+            new InitTemplateItem('input', 'mMaxToMNom', 'form-control w1', null, null, '<i>M<sub>max</sub> / M<sub>ном</sub> </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
         ];
 
         var energySystemResistance = {r: null, x: null, r0: null, x0: null};
@@ -559,6 +575,19 @@
             }
             elementImg.innerHTML = img;
         }
+
+        function changeElementCos(rowId, elSelectValue) {
+            let elementCos = document.getElementById('complexCosF' + rowId);
+             let elementCosValue = elementCos.value;
+            let val;
+            if (elSelectValue == '' || elSelectValue === null || elSelectValue === undefined) {
+                val = schemaObj.defaultVar.cosPphi;
+            } else {
+                val = cosPphiComplex[elSelectValue]; 
+            }
+            elementCos.value = val;
+            schemaObj.templates[rowId][1] = val;
+        }        
 
         function changeCheckbox(elementId, rowId) {
             let checkbox = document.getElementById(elementId);
@@ -1872,14 +1901,15 @@
             };
             let elSelect = document.getElementById(elementId);
             let elSelectValue = elSelect.value;
+            changeElementImg(rowId, elSelectValue);
+            changeElementCos(rowId, elSelectValue);
             if (elSelectValue == '') {
                 document.getElementById("complex-data").innerHTML = '';
                 addResistance(rowId);
             } else {
                 renderTemplComplex(elSelectValue, rowId);
                 changeElementValue(elementId, rowId);   
-            }
-            changeElementImg(rowId, elSelectValue);
+            }  
         }
 
         function renderTemplComplex(elSelectValue, rowId) {
