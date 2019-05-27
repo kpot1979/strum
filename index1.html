@@ -1073,10 +1073,10 @@
                 obj.ia0max = Math.sqrt(2) * obj.ik3max;
                 obj.ia0min = Math.sqrt(2) * obj.ik3min;
             } else if (lastElement && lastElement.key == 'ad') {
-                obj.ik3max = resistance.ead / (Math.sqrt(Math.pow(resistance.Z1ng + obj.r, 2) + Math.pow(resistance.Z1ng + obj.x, 2)));
-                obj.ik3min = resistance.ead / (Math.sqrt(Math.pow(resistance.Z1ng * resistance.cosF + obj.r + arcResistance, 2) + Math.pow(resistance.Z1ng * sinF + obj.x, 2)));
-                obj.iudmax = Math.sqrt(2) * obj.ik3max * koefUd(obj.r, obj.x);
-                obj.iudmin = Math.sqrt(2) * obj.ik3min * koefUd(obj.r + arcResistance, obj.x);
+                obj.ik3max = resistance.ead / (Math.sqrt(Math.pow(resistance.rad + obj.r, 2) + Math.pow(resistance.xad + obj.x, 2)));
+                obj.ik3min = resistance.ead / (Math.sqrt(Math.pow(resistance.rad + obj.r + arcResistance, 2) + Math.pow(resistance.xad + obj.x, 2)));
+                //obj.iudmax = Math.sqrt(2) * obj.ik3max * koefUd(obj.r, obj.x);
+                //obj.iudmin = Math.sqrt(2) * obj.ik3min * koefUd(obj.r + arcResistance, obj.x);
                 obj.ia0max = Math.sqrt(2) * obj.ik3max;
                 obj.ia0min = Math.sqrt(2) * obj.ik3min;
             } else if (lastElement && lastElement.key == 'sd') {
