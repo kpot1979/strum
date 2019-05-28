@@ -60,7 +60,7 @@
         var ad_lg_Svg = '<img src=\"images/ad_lg.svg\">';
         var ad_ln_p_Svg = '<img src=\"images/ad_ln_p.svg\">';
         var ad_ln_eu_Svg = '<img src=\"images/ad_ln_eu.svg\">';
-        var ln_p_eu_Svg = '<img src=\"images/ln_p_eu.svg\">'; 
+        var ln_p_eu_Svg = '<img src=\"images/ln_p_eu.svg\">';
 
         var reportSysSvg = '<img src=\"images/reportSysSvg.svg\">';
         var reportRSvg = '<img src=\"images/reportRSvg.svg\">';
@@ -79,7 +79,7 @@
         var chart_AD_LN_EU = '<img src=\"images/chart_AD_LN_EU.svg\" class=\"img-responsive\">';
         var chart_LN_P_EU = '<img src=\"images/chart_LN_P_EU.svg\" class=\"img-responsive\">';
 
-        var chartComplex ={
+        var chartComplex = {
             AD_LN: chart_AD_LN,
             AD_P: chart_AD_P,
             AD_EU: chart_AD_EU,
@@ -89,7 +89,7 @@
             LN_P_EU: chart_LN_P_EU
         }
 
-        var cosPphiComplex ={
+        var cosPphiComplex = {
             AD_LN: 0.9,
             AD_P: 0.85,
             AD_EU: 0.85,
@@ -184,14 +184,24 @@
             Z0ng: null
         };
         var adResistance = {
-            sinF : null,
-            current : null,
-            rsd : null,
-            xsd : null,
-            zsd : null,
-            esd : null
+            pmh: null,
+            sinF: null,
+            current: null,
+            r1: null,
+            r2: null,
+            rad: null,
+            xad: null,
+            zad: null,
+            ead: null
         };
-        var sdResistance = {r: null, x: null, r0: null, x0: null};
+        var sdResistance = {
+            sinF: null,
+            current: null,
+            rsd: null,
+            xsd: null,
+            zsd: null,
+            esd: null
+        };
 
         var energySystemObj = new ElementsDataObj('energySystem', 'Энергосистема', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
         var transformatorObj = new ElementsDataObj('transformator', 'Трансформатор', null, null, null, '<div class=\"form-inline\">{tpl}</div>', null, null);
@@ -423,7 +433,7 @@
                 img = knSvg;
             } else if (element == 'ad' || element == 'sd') {
                 img = adSvg;
-            }  else {
+            } else {
                 img = klSvg;
             }
             if (insert !== null) {
@@ -561,35 +571,35 @@
             if (elSelectValue == '' || elSelectValue === null || elSelectValue === undefined) {
                 img = knSvg;
             } else if (elSelectValue == 'AD_LN') {
-                img = ad_ln_Svg; 
+                img = ad_ln_Svg;
             } else if (elSelectValue == 'AD_P') {
                 img = ad_p_Svg;
             } else if (elSelectValue == 'AD_EU') {
-                img = ad_eu_Svg; 
+                img = ad_eu_Svg;
             } else if (elSelectValue == 'AD_LG') {
                 img = ad_lg_Svg;
             } else if (elSelectValue == 'AD_LN_P') {
-                img = ad_ln_p_Svg; 
+                img = ad_ln_p_Svg;
             } else if (elSelectValue == 'AD_LN_EU') {
                 img = ad_ln_eu_Svg;
             } else if (elSelectValue == 'LN_P_EU') {
-                img = ln_p_eu_Svg; 
+                img = ln_p_eu_Svg;
             }
             elementImg.innerHTML = img;
         }
 
         function changeElementCos(rowId, elSelectValue) {
             let elementCos = document.getElementById('complexCosF' + rowId);
-             let elementCosValue = elementCos.value;
+            let elementCosValue = elementCos.value;
             let val;
             if (elSelectValue == '' || elSelectValue === null || elSelectValue === undefined) {
                 val = schemaObj.defaultVar.cosPphi;
             } else {
-                val = cosPphiComplex[elSelectValue]; 
+                val = cosPphiComplex[elSelectValue];
             }
             elementCos.value = val;
             schemaObj.templates[rowId][1].valueItem = val;
-        }        
+        }
 
         function changeCheckbox(elementId, rowId) {
             let checkbox = document.getElementById(elementId);
@@ -632,7 +642,7 @@
                 calcResistanceAd(rowId, template);
             } else if (element.key == 'sd') {
                 calcResistanceSd(rowId, template);
-            }            
+            }
             if (element.key != 'complex' || element.key != 'ad' || element.key != 'sd') {
                 schemaObj.resistance[rowId].r = resistance[0]; //r
                 schemaObj.resistance[rowId].x = resistance[1];  //x
@@ -835,12 +845,13 @@
             let iPuskToINom = template[4].valueItem * 1;
             let mPuskToMNom = template[5].valueItem * 1;
             let error = false;
-            let r1 = null, r2 = null, rad = null, xad = null, zad = null, ead = null, pmh = null, inom = null, sinF = null;
+            let r1 = null, r2 = null, rad = null, xad = null, zad = null, ead = null, pmh = null, inom = null,
+                sinF = null;
             if (power != '' && cosF != '' && kpd != '' && sNom != '' && iPuskToINom != '' && mPuskToMNom != '') {
                 pmh = 0.02 * power;
                 sinF = Math.sin(Math.acos(cosF));
-                inom = power / (Math.sqrt(3) * 0.38 * cosF * (kpd/100));
-                r2 = (0.36 * mPuskToMNom * (power - pmh)) * 1000000 / (Math.pow(iPuskToINom, 2) * Math.pow(inom, 2) * ( 1 - (sNom / 100)));
+                inom = power / (Math.sqrt(3) * 0.38 * cosF * (kpd / 100));
+                r2 = (0.36 * mPuskToMNom * (power - pmh)) * 1000000 / (Math.pow(iPuskToINom, 2) * Math.pow(inom, 2) * (1 - (sNom / 100)));
                 r1 = (sNom / 100) * ((Math.pow(0.38, 2) * cosF * 1000000) / power);
                 zad = (380 * 1000) / (Math.sqrt(3) * iPuskToINom * inom);
                 rad = r1 + (0.96 * r2);
@@ -856,10 +867,10 @@
                 schemaObj.resistance[rowId].zad = zad;
                 schemaObj.resistance[rowId].ead = ead;
                 schemaObj.resistanceStatus[rowId] = true;
-                addResistance(rowId);  
+                addResistance(rowId);
             } else {
                 schemaObj.resistanceStatus[rowId] = false;
-            } 
+            }
         }
 
         function calcResistanceSd(rowId, template) {
@@ -871,7 +882,7 @@
             if (kpd == null || kpd == '' || kpd == 0) {
                 kpd = 1;
             } else {
-                kpd = kpd/100;
+                kpd = kpd / 100;
             }
             if (power != '' && cosF != '') {
                 sinF = Math.sin(Math.acos(cosF));
@@ -887,10 +898,10 @@
                 schemaObj.resistance[rowId].zsd = zsd;
                 schemaObj.resistance[rowId].esd = esd;
                 schemaObj.resistanceStatus[rowId] = true;
-                addResistance(rowId);  
+                addResistance(rowId);
             } else {
                 schemaObj.resistanceStatus[rowId] = false;
-            } 
+            }
         }
 
         function getKoef(power, obj) {
@@ -1047,7 +1058,7 @@
                             if (kzIdkey == rowId) break;
                         }
                         for (let rowId in schemaObj.resistance) { //Inverse
-                            if ((schemaObj.elements[rowId].key == 'complex' && schemaObj.resistanceStatus[rowId] == false) || (schemaObj.elements[rowId].key == 'ad' && schemaObj.resistanceStatus[rowId] == false) || (schemaObj.elements[rowId].key == 'sd' && schemaObj.resistanceStatus[rowId] == false))  {
+                            if ((schemaObj.elements[rowId].key == 'complex' && schemaObj.resistanceStatus[rowId] == false) || (schemaObj.elements[rowId].key == 'ad' && schemaObj.resistanceStatus[rowId] == false) || (schemaObj.elements[rowId].key == 'sd' && schemaObj.resistanceStatus[rowId] == false)) {
                                 error.push(rowId);
                             }
                             if (rowId <= kzIdkey || schemaObj.elements[rowId].key == 'complex' || schemaObj.elements[rowId].key == 'ad' || schemaObj.elements[rowId].key == 'sd') {
@@ -1105,18 +1116,18 @@
                 obj.ik3min = resistance.ead / (Math.sqrt(Math.pow(resistance.rad + obj.r + arcResistance, 2) + Math.pow(resistance.xad + obj.x, 2)));
                 obj.ia0max = Math.sqrt(2) * obj.ik3max;
                 obj.ia0min = Math.sqrt(2) * obj.ik3min;
-                let tp = (resistance.xad + obj.x)/(314 * resistance.r2);
-                let ta = (resistance.xad + obj.x)/(314 * (resistance.r1 + obj.r));
-                obj.iudmax = Math.sqrt(2) * obj.ik3max * (Math.exp(-0.01/tp) + Math.exp(-0.01/ta));
-                obj.iudmin = Math.sqrt(2) * obj.ik3min * (Math.exp(-0.01/tp) + Math.exp(-0.01/ta));
+                let tp = (resistance.xad + obj.x) / (314 * resistance.r2);
+                let ta = (resistance.xad + obj.x) / (314 * (resistance.r1 + obj.r));
+                obj.iudmax = Math.sqrt(2) * obj.ik3max * (Math.exp(-0.01 / tp) + Math.exp(-0.01 / ta));
+                obj.iudmin = Math.sqrt(2) * obj.ik3min * (Math.exp(-0.01 / tp) + Math.exp(-0.01 / ta));
             } else if (lastElement && lastElement.key == 'sd') {
                 obj.ik3max = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + obj.r, 2) + Math.pow(resistance.xsd + obj.x, 2)));
                 obj.ik3min = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + obj.r + arcResistance, 2) + Math.pow(resistance.xsd + obj.x, 2)));
                 obj.ia0max = Math.sqrt(2) * obj.ik3max;
                 obj.ia0min = Math.sqrt(2) * obj.ik3min;
-                let ta = (resistance.xsd + obj.x)/(314 * (resistance.rsd + obj.r));
-                obj.iudmax = Math.sqrt(2) * obj.ik3max * (1 + Math.exp(-0.01/ta));
-                obj.iudmin = Math.sqrt(2) * obj.ik3min * (1 + Math.exp(-0.01/ta));
+                let ta = (resistance.xsd + obj.x) / (314 * (resistance.rsd + obj.r));
+                obj.iudmax = Math.sqrt(2) * obj.ik3max * (1 + Math.exp(-0.01 / ta));
+                obj.iudmin = Math.sqrt(2) * obj.ik3min * (1 + Math.exp(-0.01 / ta));
             }
             return obj;
         }
@@ -1908,7 +1919,7 @@
             }
             tbody.innerHTML = html;
             if (schemaObj.elements[rowId].key == 'complex') {
-            changeElementImg(complex[0],complex[1]);
+                changeElementImg(complex[0], complex[1]);
             }
         }
 
@@ -1993,8 +2004,8 @@
                 addResistance(rowId);
             } else {
                 renderTemplComplex(elSelectValue, rowId);
-                changeElementValue(elementId, rowId);   
-            }  
+                changeElementValue(elementId, rowId);
+            }
         }
 
         function renderTemplComplex(elSelectValue, rowId) {
