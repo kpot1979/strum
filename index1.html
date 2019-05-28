@@ -158,8 +158,6 @@
             new InitTemplateItem('input', 'power', 'form-control w1', null, null, '<i>Мощность </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' кВт', null),
             new InitTemplateItem('input', 'CosF', 'form-control w1', null, null, '<i>cos&phi; </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
             new InitTemplateItem('input', 'kpd', 'form-control w1', null, null, '<i>КПД &eta; </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' %', null),
-            new InitTemplateItem('input', 'iPuskToINom', 'form-control w1', null, null, '<i>I<sub>пуск</sub> / I<sub>ном</sub> </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
-            new InitTemplateItem('input', 'mPuskToMNom', 'form-control w1', null, null, '<i>M<sub>пуск</sub> / M<sub>ном</sub> </i> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', '', null),
         ];
 
         var energySystemResistance = {r: null, x: null, r0: null, x0: null};
@@ -186,15 +184,12 @@
             Z0ng: null
         };
         var adResistance = {
-            pmh : null,
             sinF : null,
-            inom : null,
-            r1 : null,
-            r2 : null,
-            rad : null,
-            xad : null,
-            zad : null,
-            ead : null
+            current : null,
+            rsd : null,
+            xsd : null,
+            zsd : null,
+            esd : null
         };
         var sdResistance = {r: null, x: null, r0: null, x0: null};
 
@@ -853,7 +848,7 @@
                 ead = Math.sqrt(Math.pow(((220 * cosF) - (inom * rad / 1000)), 2) + Math.pow(((220 * sinF) - (inom * xad / 1000)), 2));
                 schemaObj.resistance[rowId].pmh = pmh;
                 schemaObj.resistance[rowId].sinF = sinF;
-                schemaObj.resistance[rowId].inom = inom;
+                schemaObj.resistance[rowId].current = inom;
                 schemaObj.resistance[rowId].r1 = r1;
                 schemaObj.resistance[rowId].r2 = r2;
                 schemaObj.resistance[rowId].rad = rad;
@@ -861,7 +856,6 @@
                 schemaObj.resistance[rowId].zad = zad;
                 schemaObj.resistance[rowId].ead = ead;
                 schemaObj.resistanceStatus[rowId] = true;
-                console.log({pmh:pmh,inom:inom,r2:r2,r1:r1,zad:zad,rad:rad,xad:xad,ead:ead});
                 addResistance(rowId);  
             } else {
                 schemaObj.resistanceStatus[rowId] = false;
@@ -869,7 +863,34 @@
         }
 
         function calcResistanceSd(rowId, template) {
-
+            let power = template[0].valueItem * 1;
+            let cosF = template[1].valueItem * 1;
+            let kpd = template[2].valueItem * 1;
+            let error = false;
+            let rsd = null, xsd = null, zsd = null, esd = null, inom = null, sinF = null;
+            if (kpd == null || kpd == '' || kpd == 0) {
+                kpd = 1;
+            } else {
+                kpd = kpd/100;
+            }
+            if (power != '' && cosF != '') {
+                sinF = Math.sin(Math.acos(cosF));
+                inom = power / (Math.sqrt(3) * 0.38 * cosF * kpd);
+                zsd = (380 * 1000) / (Math.sqrt(3) * inom);
+                xsd = 0.15 * zsd;
+                rsd = 0.15 * xsd;
+                esd = Math.sqrt(Math.pow(220 - (inom * (xsd / 1000) * sinF), 2) + Math.pow(inom * (xsd / 1000) * cosF, 2));
+                schemaObj.resistance[rowId].sinF = sinF;
+                schemaObj.resistance[rowId].current = inom;
+                schemaObj.resistance[rowId].rsd = rsd;
+                schemaObj.resistance[rowId].xsd = xsd;
+                schemaObj.resistance[rowId].zsd = zsd;
+                schemaObj.resistance[rowId].esd = esd;
+                schemaObj.resistanceStatus[rowId] = true;
+                addResistance(rowId);  
+            } else {
+                schemaObj.resistanceStatus[rowId] = false;
+            } 
         }
 
         function getKoef(power, obj) {
@@ -927,7 +948,13 @@
                     }
                 }
             } else if (schemaObj.elements[rowId].key == 'sd') {
-
+                if (schemaObj.resistanceStatus[rowId] != false) {
+                    if (schemaObj.resistance[rowId].esd !== 0 && schemaObj.resistance[rowId].esd !== null) {
+                        html += 'X&Prime;<sub>d</sub>=' + customRound(schemaObj.resistance[rowId].xsd, 1) + ' мОм<br>';
+                        html += 'R<sub>сд</sub>=' + customRound(schemaObj.resistance[rowId].rsd, 1) + ' мОм<br>';
+                        html += 'E&Prime;<sub>ф.сд</sub>=' + customRound(schemaObj.resistance[rowId].esd, 1) + ' В<br>';
+                    }
+                }
             } else {
                 if (schemaObj.resistanceStatus[rowId] != false) {
                     if (schemaObj.resistance[rowId].x !== 0 && schemaObj.resistance[rowId].x !== null) {
@@ -1068,21 +1095,29 @@
                 let sinF = Math.sin(Math.acos(resistance.cosF));
                 obj.ik3max = resistance.Eng / (Math.sqrt(3) * Math.sqrt(Math.pow(resistance.Z1ng * resistance.cosF + obj.r, 2) + Math.pow(resistance.Z1ng * sinF + obj.x, 2)));
                 obj.ik3min = resistance.Eng / (Math.sqrt(3) * Math.sqrt(Math.pow(resistance.Z1ng * resistance.cosF + obj.r + arcResistance, 2) + Math.pow(resistance.Z1ng * sinF + obj.x, 2)));
-                obj.iudmax = Math.sqrt(2) * obj.ik3max * koefUd(obj.r, obj.x);
-                obj.iudmin = Math.sqrt(2) * obj.ik3min * koefUd(obj.r + arcResistance, obj.x);
                 obj.ia0max = Math.sqrt(2) * obj.ik3max;
                 obj.ia0min = Math.sqrt(2) * obj.ik3min;
+                obj.iudmax = Math.sqrt(2) * obj.ik3max * koefUd(obj.r, obj.x);
+                obj.iudmin = Math.sqrt(2) * obj.ik3min * koefUd(obj.r + arcResistance, obj.x);
+
             } else if (lastElement && lastElement.key == 'ad') {
                 obj.ik3max = resistance.ead / (Math.sqrt(Math.pow(resistance.rad + obj.r, 2) + Math.pow(resistance.xad + obj.x, 2)));
                 obj.ik3min = resistance.ead / (Math.sqrt(Math.pow(resistance.rad + obj.r + arcResistance, 2) + Math.pow(resistance.xad + obj.x, 2)));
-                //obj.iudmax = Math.sqrt(2) * obj.ik3max * koefUd(obj.r, obj.x);
-                //obj.iudmin = Math.sqrt(2) * obj.ik3min * koefUd(obj.r + arcResistance, obj.x);
                 obj.ia0max = Math.sqrt(2) * obj.ik3max;
                 obj.ia0min = Math.sqrt(2) * obj.ik3min;
+                let tp = (resistance.xad + obj.x)/(314 * resistance.r2);
+                let ta = (resistance.xad + obj.x)/(314 * (resistance.r1 + obj.r));
+                obj.iudmax = Math.sqrt(2) * obj.ik3max * (Math.exp(-0.01/tp) + Math.exp(-0.01/ta));
+                obj.iudmin = Math.sqrt(2) * obj.ik3min * (Math.exp(-0.01/tp) + Math.exp(-0.01/ta));
             } else if (lastElement && lastElement.key == 'sd') {
-
+                obj.ik3max = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + obj.r, 2) + Math.pow(resistance.xsd + obj.x, 2)));
+                obj.ik3min = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + obj.r + arcResistance, 2) + Math.pow(resistance.xsd + obj.x, 2)));
+                obj.ia0max = Math.sqrt(2) * obj.ik3max;
+                obj.ia0min = Math.sqrt(2) * obj.ik3min;
+                let ta = (resistance.xsd + obj.x)/(314 * (resistance.rsd + obj.r));
+                obj.iudmax = Math.sqrt(2) * obj.ik3max * (1 + Math.exp(-0.01/ta));
+                obj.iudmin = Math.sqrt(2) * obj.ik3min * (1 + Math.exp(-0.01/ta));
             }
-
             return obj;
         }
 
@@ -1115,7 +1150,7 @@
                     customModal(textResistanceIsNotDefined, getErrorItems(error));
                 } else {
                     let rowspan = 3
-                    if (lastElement && lastElement.key == 'complex') {
+                    if ((lastElement && lastElement.key == 'complex') || (lastElement && lastElement.key == 'ad') || (lastElement && lastElement.key == 'sd')) {
                         rowspan = rowspan + 2;
                     }
                     string += "<h3>Результаты расчета токов КЗ</h3>";
@@ -1162,7 +1197,7 @@
                         string += "    <td>-</td>";
                         string += "    <td>-</td>";
                         string += "</tr>";
-                        if (lastElement && lastElement.key == 'complex') {
+                        if ((lastElement && lastElement.key == 'complex') || (lastElement && lastElement.key == 'ad') || (lastElement && lastElement.key == 'sd')) {
                             let ik3max = schemaObj.calcInverse[pointKz].ik3max;
                             let ia0max = schemaObj.calcInverse[pointKz].ia0max;
                             let iudmax = schemaObj.calcInverse[pointKz].iudmax;
