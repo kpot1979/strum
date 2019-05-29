@@ -51,7 +51,7 @@
         var shinoprovodSvg = '<img src=\"images/shinoprovodSvg.svg\">';
         var uniqueSvg = '<img src=\"images/uniqueSvg.svg\">';
         var knSvg = '<img src=\"images/knSvg.svg\">';
-        var adSvg = '<img src=\"images/adSvg.svg\">';
+        var dvigatelSvg = '<img src=\"images/dvigatelSvg.svg\">';
         var pointKzSvg = '<img src=\"images/pointKzSvg.svg\">';
 
         var ad_ln_Svg = '<img src=\"images/ad_ln.svg\">';
@@ -431,8 +431,10 @@
                 img = uniqueSvg;
             } else if (element == 'complex') {
                 img = knSvg;
-            } else if (element == 'ad' || element == 'sd') {
-                img = adSvg;
+            } else if (element == 'ad') {
+                img = dvigatelSvg;
+            } else if (element == 'sd') {
+                img = dvigatelSvg;
             } else {
                 img = klSvg;
             }
@@ -1293,8 +1295,12 @@
                         string += reportUnique(rowId, title);
                     } else if (schemaObj.elements[rowId].key == 'complex') {
                         string += reportComplex(rowId, title);
+                    } else if (schemaObj.elements[rowId].key == 'ad') {
+                        string += reportAd(rowId, title);
+                    } else if (schemaObj.elements[rowId].key == 'sd') {
+                        string += reportSd(rowId, title);
                     }
-                    if (schemaObj.elements[rowId].key == 'complex') {
+                    if (schemaObj.elements[rowId].key == 'complex' || schemaObj.elements[rowId].key == 'ad' || schemaObj.elements[rowId].key == 'sd') {
                         if (schemaObj.resistanceStatus[rowId] == false) {
                             error.push(rowId);
                         }
@@ -1522,6 +1528,49 @@
             return string;
         }
 
+        function reportAd(rowId, title) {
+            let indexArr = schemaObj.elements[rowId].name.split(" ");
+            let index = indexArr.map(function (item) {
+                return item[0].toUpperCase();
+            });
+            index = index.join('');
+            let string = '';
+            string += '<div class="area">';
+            string += '<h5><strong>' + title + ' на участке ' + rowId + ':</strong></h5>';
+            string += 'Механические потери в электродвигателе:<br>';
+            string += 'P<sub>мх</sub> = 0.02 &times; P<sub>ном</sub> = 0.02 &times; ' + schemaObj.templates[rowId][0].valueItem + ' = ' + customRound(schemaObj.resistance[rowId].pmh) + ' кВт.<br>';
+            string += 'Активное сопротивление ротора, приведенное к статору:<br>';
+            string += '<table style="min-width: 590px;"><tr><td rowspan="2">R<sub>2</sub>&nbsp;=&nbsp;</td><td style="text-align:center;">0.36 &times; M<sub>п</sub> &times; (P<sub>ном</sub> + P<sub>мх</sub>)</td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">0.36 &times; ' + schemaObj.templates[rowId][5].valueItem + ' &times; (' + schemaObj.templates[rowId][0].valueItem + ' + ' + customRound(schemaObj.resistance[rowId].pmh) + ') &times; 10<sup>6</sup></td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].r2) + ' мОм.</td></tr><tr><td style="border-top: 1px solid #000;text-align:center;">I<sub>п</sub><sup>2</sup> &times; I<sub>ном</sub><sup>2</sup> &times; (1 - S<sub>ном</sub>)</td><td style="border-top: 1px solid #000;text-align:center;">' + schemaObj.templates[rowId][4].valueItem + '<sup>2</sup> &times; ' + customRound(schemaObj.resistance[rowId].current, 1) + '<sup>2</sup> &times; (1 - ' + customRound(schemaObj.templates[rowId][3].valueItem/100) + ')</td></tr></table>';
+            string += 'Активное сопротивление статора:<br>'; 
+            string += '<table style="min-width: 540px;"><tr><td rowspan="2">R<sub>1</sub>&nbsp;=&nbsp;</td><td style="text-align:center;">S<sub>ном</sub> &times; U<sub>ном</sub><sup>2</sup> &times; cos&phi;<sub>ном</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">' + customRound(schemaObj.templates[rowId][3].valueItem/100) + ' &times; 0.38<sup>2</sup> &times; ' + schemaObj.templates[rowId][1].valueItem + ' &times; 10<sup>6</sup></td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].r1) + ' мОм.</td></tr><tr><td style="border-top: 1px solid #000;text-align:center;">P<sub>ном</sub></td><td style="border-top: 1px solid #000;text-align:center;">' + schemaObj.templates[rowId][0].valueItem + '</td></tr></table>';
+            string += 'Суммарное активное сопротивление в начальный момент КЗ:<br>';
+            string += 'R<sub>ад</sub> = R<sub>1</sub> + 0.96 &times; R<sub>2</sub> = ' + customRound(schemaObj.resistance[rowId].r1) + ' + 0.96 &times; ' + customRound(schemaObj.resistance[rowId].r2) + ' = ' + customRound(schemaObj.resistance[rowId].rad) + ' мОм.<br>';
+            string += 'Полное сопротивление в начальный момент КЗ:<br>';
+            string += '<table style="min-width: 400px;"><tr><td rowspan="2">Z<sub>ад</sub>&nbsp;=&nbsp;</td><td style="text-align:center;">U<sub>ном</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">0,38 &times; 10<sup>6</sup></td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].zad) + ' мОм.</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; I<sub>п</sub> &times; I<sub>ном</sub></td><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; ' + schemaObj.templates[rowId][4].valueItem + ' &times; ' + customRound(schemaObj.resistance[rowId].current, 1) + '</td></tr></table>';
+            string += 'Сверхпереходное сопротивление асинхронного дигателя:<br>';
+            string += 'X&Prime;<sub>ад</sub> = &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">Z<sub>ад</sub><sup>2</sup> - R<sub>ад</sub><sup>2</sup></div> = &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">' + customRound(schemaObj.resistance[rowId].zad) + '<sup>2</sup> - ' + customRound(schemaObj.resistance[rowId].rad) + '<sup>2</sup></div> = ' + customRound(schemaObj.resistance[rowId].xad) + ' мОм.<br>';
+            string += 'Сверхпереходная ЭДС асинхронного дигателя:<br>';
+            string += 'E&Prime;<sub>ф.ад</sub> = &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(U<sub>ф</sub> &times; cos&phi; - I<sub>ном</sub> &times; R<sub>ад</sub>)<sup>2</sup> + (U<sub>ф</sub> &times; sin&phi; - I<sub>ном</sub> &times; X&Prime;<sub>ад</sub>)<sup>2</sup></div>;<br><br>';
+            string += 'E&Prime;<sub>ф.ад</sub> = &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(220 &times; ' + schemaObj.templates[rowId][1].valueItem + ' - ' + customRound(schemaObj.resistance[rowId].current, 1) + ' &times; ' + customRound(schemaObj.resistance[rowId].rad/1000, 4) + ')<sup>2</sup> + (220 &times; ' + customRound(schemaObj.resistance[rowId].sinF) + ' - ' + customRound(schemaObj.resistance[rowId].current, 1) + ' &times; ' + customRound(schemaObj.resistance[rowId].xad/1000, 4) + ')<sup>2</sup></div> = ' + customRound(schemaObj.resistance[rowId].ead, 1) + ' В.<br>';
+            string += '</div>';
+            return string;
+        }
+
+        function reportSd(rowId, title) {
+            let indexArr = schemaObj.elements[rowId].name.split(" ");
+            let index = indexArr.map(function (item) {
+                return item[0].toUpperCase();
+            });
+            index = index.join('');
+            let string = '';
+            string += '<div class="area">';
+            string += '<h5><strong>' + title + ' на участке ' + rowId + ':</strong></h5>';
+            string += 'Полное сопротивление в начальный момент КЗ:<br>';
+            string += '<table style="min-width: 380px;"><tr><td rowspan="2">Z<sub>сд</sub>&nbsp;=&nbsp;</td><td style="text-align:center;">U<sub>ном</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">0,38 &times; 10<sup>6</sup></td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].zsd) + ' мОм.</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; I<sub>ном</sub></td><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; ' + customRound(schemaObj.resistance[rowId].current, 1) + '</td></tr></table>';
+            string += '</div>';
+            return string;
+        }
+
         function reportCalcKz() {
             let string = '';
             for (let kzIdkey in schemaObj.kzId) {
@@ -1569,10 +1618,10 @@
                 string += 'R<sub>&sum;</sub> = ' + formulaR.replace(/\+ $/g, '') + ' = ' + valuesR.replace(/\+ $/g, '') + ' = ' + customRound(R) + ' мОм;<br>';
                 string += 'X<sub>&sum;</sub> = ' + formulaX.replace(/\+ $/g, '') + ' = ' + valuesX.replace(/\+ $/g, '') + ' = ' + customRound(X) + ' мОм;<br>';
                 string += 'R<sub>0&sum;</sub> = ' + formulaR0.replace(/\+ $/g, '') + ' = ' + valuesR0.replace(/\+ $/g, '') + ' = ' + customRound(R0) + ' мОм;<br>';
-                string += 'X<sub>0&sum;</sub> = ' + formulaX0.replace(/\+ $/g, '') + ' = ' + valuesX0.replace(/\+ $/g, '') + ' = ' + customRound(X0) + ' мОм.<br>';
+                string += 'X<sub>0&sum;</sub> = ' + formulaX0.replace(/\+ $/g, '') + ' = ' + valuesX0.replace(/\+ $/g, '') + ' = ' + customRound(X0) + ' мОм;<br>';
                 let arcResistance = schemaObj.defaultVar.arcResistance * 1;
                 let rSumAccent = customRound(R) + arcResistance;
-                string += 'R<sub>&sum;</sub>&prime; = R<sub>&sum;</sub> + R<sub>д</sub>  = ' + customRound(R) + ' + ' + arcResistance + ' = ' + customRound(rSumAccent) + ' мОм;<br>';
+                string += 'R<sub>&sum;</sub>&prime; = R<sub>&sum;</sub> + R<sub>д</sub>  = ' + customRound(R) + ' + ' + arcResistance + ' = ' + customRound(rSumAccent) + ' мОм.<br>';
                 let ik3max = customRound((schemaObj.defaultVar.unn * 1000) / (Math.sqrt(3) * Math.sqrt(Math.pow(X, 2) + Math.pow(R, 2))));
                 let ik3min = customRound((schemaObj.defaultVar.unn * 1000) / (Math.sqrt(3) * Math.sqrt(Math.pow(X, 2) + Math.pow(R + arcResistance, 2))));
                 let ikudmax = customRound(Math.sqrt(2) * ik3max * koefUd(R, X));
@@ -1638,6 +1687,10 @@
                     img = reportComplexSvg;
                     ifComplex = true;
                     chart = chartComplex[schemaObj.templates[rowId][0].valueItem];
+                } else if (schemaObj.elements[rowId].key == 'ad') {
+                    img = reportAdSvg;
+                } else if (schemaObj.elements[rowId].key == 'sd') {
+                    img = reportAdSvg;
                 } else {
                     img = reportRxSvg;
                 }
