@@ -96,11 +96,11 @@
         font-family: arial;
     }
 
-    .energySystemImg .resistanceData span {
+    .energySystemImage .resistanceData span {
         top: 40px;
     }
 
-    .hookupImg .resistanceData span {
+    .hookupImage .resistanceData span {
         top: 30px;
     }
 
