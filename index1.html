@@ -1567,6 +1567,10 @@
             string += '<h5><strong>' + title + ' на участке ' + rowId + ':</strong></h5>';
             string += 'Полное сопротивление в начальный момент КЗ:<br>';
             string += '<table style="min-width: 380px;"><tr><td rowspan="2">Z<sub>сд</sub>&nbsp;=&nbsp;</td><td style="text-align:center;">U<sub>ном</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">0,38 &times; 10<sup>6</sup></td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].zsd) + ' мОм.</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; I<sub>ном</sub></td><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; ' + customRound(schemaObj.resistance[rowId].current, 1) + '</td></tr></table>';
+            string += 'Сверхпереходное сопротивление синхронного дигателя:<br>';
+            string += 'X&Prime;<sub>d</sub> = 0.15 &times; Z<sub>сд</sub> = 0.15 &times; ' + customRound(schemaObj.resistance[rowId].zsd) + ' = ' + customRound(schemaObj.resistance[rowId].xsd) + ' мОм.<br>';
+            string += 'Aктивное сопротивление в начальный момент КЗ:<br>';
+            string += 'R<sub>сд</sub> = 0.15 &times; X&Prime;<sub>d</sub> = 0.15 &times; ' + customRound(schemaObj.resistance[rowId].xsd) + ' = ' + customRound(schemaObj.resistance[rowId].rsd) + ' мОм.<br>';
             string += '</div>';
             return string;
         }
