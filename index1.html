@@ -1775,6 +1775,16 @@
             }
         }
 
+        function resultClose() {
+            let close = document.getElementById("report-close");
+            let resultBlock = document.getElementById('projectResult');
+            let setBlock = document.getElementById('projectSet');
+            if (close) {
+                    resultBlock.innerHTML = '';
+                    setBlock.style.display = 'block';
+            }           
+        }
+
         function saveLocalScheme() {
             let html = '';
             let name = '';
@@ -1855,6 +1865,7 @@
                     elLoad.addEventListener("click", function () {
                         let projectId = localStorage.getItem(id);
                         if (projectId !== null) {
+                            resultClose();
                             renderScheme(projectId);
                         }
                     });
@@ -1933,6 +1944,7 @@
             let dataFileBlock = document.getElementById('dataFileBlock').innerHTML;
             let data = JSON.parse(dataFileBlock);
             //schemaObj = data;
+            resultClose();
             renderScheme(JSON.stringify(data));
         }
 
