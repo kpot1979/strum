@@ -40,7 +40,7 @@
             сomplex: 'КН',
             ad: 'АД',
             sd: 'СД'
-        }
+        };
 
         var systemSvg = '<img src=\"images/systemSvg.svg\">';
         var transformatorSvg = '<img src=\"images/transformatorSvg.svg\">';
@@ -87,7 +87,7 @@
             AD_LN_P: chart_AD_LN_P,
             AD_LN_EU: chart_AD_LN_EU,
             LN_P_EU: chart_LN_P_EU
-        }
+        };
 
         var cosPphiComplex = {
             AD_LN: 0.9,
@@ -97,7 +97,7 @@
             AD_LN_P: 0.9,
             AD_LN_EU: 0.9,
             LN_P_EU: 0.9
-        }
+        };
 
         var energySystemTemplate = [
             new InitTemplateItem('input', 'energySystemUvn', 'form-control w1', schemaObj.defaultVar.uvn, null, '<i>U</i><sub>с.ВН</sub> =&nbsp;', 'changeElementValue', '<div class=\"form-group\">', '</div>', ' кВ', null),
@@ -367,7 +367,7 @@
             if (tplWrp !== null) {
                 tplWrp = tplWrp.split('{tpl}');
             } else {
-                tplWrp = ['', '']
+                tplWrp = ['', ''];
             }
             html += htmlDecode(tplWrp[0]);
             for (let i = 0; i < template.length; i++) {
@@ -1129,16 +1129,18 @@
                 obj.ia0min = Math.sqrt(2) * obj.ik3min;
                 let tp = (resistance.xad + obj.x) / (314 * resistance.r2);
                 let ta = (resistance.xad + obj.x) / (314 * (resistance.r1 + obj.r));
+                let taMin = (resistance.xad + obj.x) / (314 * (resistance.r1 + obj.r + arcResistance));
                 obj.iudmax = Math.sqrt(2) * obj.ik3max * (Math.exp(-0.01 / tp) + Math.exp(-0.01 / ta));
-                obj.iudmin = Math.sqrt(2) * obj.ik3min * (Math.exp(-0.01 / tp) + Math.exp(-0.01 / ta));
+                obj.iudmin = Math.sqrt(2) * obj.ik3min * (Math.exp(-0.01 / tp) + Math.exp(-0.01 / taMin));
             } else if (lastElement && lastElement.key == 'sd') {
                 obj.ik3max = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + obj.r, 2) + Math.pow(resistance.xsd + obj.x, 2)));
                 obj.ik3min = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + obj.r + arcResistance, 2) + Math.pow(resistance.xsd + obj.x, 2)));
                 obj.ia0max = Math.sqrt(2) * obj.ik3max;
                 obj.ia0min = Math.sqrt(2) * obj.ik3min;
                 let ta = (resistance.xsd + obj.x) / (314 * (resistance.rsd + obj.r));
+                let taMin = (resistance.xsd + obj.x) / (314 * (resistance.rsd + obj.r + arcResistance));
                 obj.iudmax = Math.sqrt(2) * obj.ik3max * (1 + Math.exp(-0.01 / ta));
-                obj.iudmin = Math.sqrt(2) * obj.ik3min * (1 + Math.exp(-0.01 / ta));
+                obj.iudmin = Math.sqrt(2) * obj.ik3min * (1 + Math.exp(-0.01 / taMin));
             }
             return obj;
         }
@@ -1647,7 +1649,7 @@
                 string += '<p>R<sub>д</sub> - <i>сопротивление дуги, мОм</i></p>';
                 string += '<h5><i>Наибольшее начальное значение апериодической составляющей тока КЗ</i>:</h5>';
                 string += 'i<sub>а0.max</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.max</sub><sup>(3)</sup> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + ik3max + ' = ' + ika0max + ' кА;<br>';
-                string += 'i<sub>а0.min</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.min</sub><sup>(3)</sup> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + ik3min + ' = ' + ika0min + ' кА;<br>';
+                string += 'i<sub>а0.min</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.min</sub><sup>(3)</sup> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + ik3min + ' = ' + ika0min + ' кА.<br>';
                 string += '<h5><i>Значение ударного тока КЗ</i>:</h5>';
                 string += 'i<sub>уд.max</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.max</sub><sup>(3)</sup> &times; K<sub>уд</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + ik3max + ' &times; ' + koefUd(R, X) + ' = ' + ikudmax + ' кА;<br>';
                 string += 'i<sub>уд.min</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.min</sub><sup>(3)</sup> &times; K<sub>уд</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + ik3min + ' &times; ' + koefUd(R + arcResistance, X) + ' = ' + ikudmin + ' кА;<br>';
@@ -1723,36 +1725,59 @@
                 } else {
                     string += 'X<sub>0&sum;</sub> = ' + customRound(X0) + ' мОм;<br>';
                 }
+                let ik3max, ik3min, ia0max, ia0min, iudmax, iudmin, sinF;
                 if (lastElement.key == 'complex') {
-                    let sinF = Math.sin(Math.acos(resistance.cosF));
-                    // obj.ik3max = resistance.Eng / (Math.sqrt(3) * Math.sqrt(Math.pow(resistance.Z1ng * resistance.cosF + obj.r, 2) + Math.pow(resistance.Z1ng * sinF + obj.x, 2)));
-                    // obj.ik3min = resistance.Eng / (Math.sqrt(3) * Math.sqrt(Math.pow(resistance.Z1ng * resistance.cosF + obj.r + arcResistance, 2) + Math.pow(resistance.Z1ng * sinF + obj.x, 2)));
-                    // obj.ia0max = Math.sqrt(2) * obj.ik3max;
-                    // obj.ia0min = Math.sqrt(2) * obj.ik3min;
-                    // obj.iudmax = Math.sqrt(2) * obj.ik3max * koefUd(obj.r, obj.x);
-                    // obj.iudmin = Math.sqrt(2) * obj.ik3min * koefUd(obj.r + arcResistance, obj.x);
+                    sinF = Math.sin(Math.acos(resistance.cosF));
+                    ik3max = resistance.Eng / (Math.sqrt(3) * Math.sqrt(Math.pow(resistance.Z1ng * resistance.cosF + R, 2) + Math.pow(resistance.Z1ng * sinF + X, 2)));
+                    ik3min = resistance.Eng / (Math.sqrt(3) * Math.sqrt(Math.pow(resistance.Z1ng * resistance.cosF + R + arcResistance, 2) + Math.pow(resistance.Z1ng * sinF + X, 2)));
+                    ia0max = Math.sqrt(2) * ik3max;
+                    ia0min = Math.sqrt(2) * ik3min;
+                    iudmax = Math.sqrt(2) * ik3max * koefUd(R, X);
+                    iudmin = Math.sqrt(2) * ik3min * koefUd(R + arcResistance, X);
                     string += '<h5><i>Максимальное значение трехфазного тока КЗ</i>:</h5>';
-                    string += '<div class="table-responsive"><table style="min-width: 450px;"><tr><td rowspan="2">I<sub>к.max</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">E&Prime;<sub>нг</sub></td><td rowspan="2">;</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(Z<sub>1нг</sub> &times; cos&phi; &times; R<sub>&sum;</sub>)<sup>2</sup> + (Z<sub>1нг</sub> &times; sin&phi; &times; X<sub>&sum;</sub>)<sup>2</sup></div></td></tr></table><br></div>';
-                    string += '<div class="table-responsive"><table style="min-width: 590px;"><tr><td rowspan="2">I<sub>к.max</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">' + customRound(resistance.Eng, 1) + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.calcInverse[kzIdkey].ik3max) + ' кА;</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(' + customRound(resistance.Z1ng) + ' &times; ' + resistance.cosF + ' &times; ' + customRound(R) + ')<sup>2</sup> + (' + customRound(resistance.Z1ng) + ' &times; ' + customRound(sinF) + ' &times; ' + customRound(X) + ')<sup>2</sup></div></td></tr></table><br></div>';
+                    string += '<div class="table-responsive"><table style="min-width: 450px;"><tr><td rowspan="2">I<sub>к.max</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">E&Prime;<sub>нг</sub></td><td rowspan="2">;</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(Z<sub>1нг</sub> &times; cos&phi; + R<sub>&sum;</sub>)<sup>2</sup> + (Z<sub>1нг</sub> &times; sin&phi; + X<sub>&sum;</sub>)<sup>2</sup></div></td></tr></table><br></div>';
+                    string += '<div class="table-responsive"><table style="min-width: 590px;"><tr><td rowspan="2">I<sub>к.max</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">' + customRound(resistance.Eng, 1) + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(ik3max) + ' кА;</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(' + customRound(resistance.Z1ng) + ' &times; ' + resistance.cosF + ' + ' + customRound(R) + ')<sup>2</sup> + (' + customRound(resistance.Z1ng) + ' &times; ' + customRound(sinF) + ' + ' + customRound(X) + ')<sup>2</sup></div></td></tr></table><br></div>';
                     string += '<h5><i>Минимальное значение трехфазного тока КЗ (с учетом сопротивления дуги)</i>:</h5>';
+                    string += '<div class="table-responsive"><table style="min-width: 470px;"><tr><td rowspan="2">I<sub>к.min</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">E&Prime;<sub>нг</sub></td><td rowspan="2">;</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(Z<sub>1нг</sub> &times; cos&phi; + R<sub>&sum;</sub> + R<sub>д</sub>)<sup>2</sup> + (Z<sub>1нг</sub> &times; sin&phi; + X<sub>&sum;</sub>)<sup>2</sup></div></td></tr></table><br></div>';
+                    string += '<div class="table-responsive"><table style="min-width: 620px;"><tr><td rowspan="2">I<sub>к.min</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">' + customRound(resistance.Eng, 1) + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(ik3min) + ' кА;</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(' + customRound(resistance.Z1ng) + ' &times; ' + resistance.cosF + ' + ' + customRound(R) + ' + ' + arcResistance + ')<sup>2</sup> + (' + customRound(resistance.Z1ng) + ' &times; ' + customRound(sinF) + ' + ' + customRound(X) + ')<sup>2</sup></div></td></tr></table><br></div>';
+                    string += '<h5><i>Наибольшее начальное значение апериодической составляющей тока КЗ</i>:</h5>';
+                    string += 'i<sub>а0.max</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.max</sub><sup>(3)</sup> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3max) + ' = ' + customRound(ia0max) + ' кА;<br>';
+                    string += 'i<sub>а0.min</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.min</sub><sup>(3)</sup> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3min) + ' = ' + customRound(ia0min) + ' кА.<br>';
+                    string += '<h5><i>Значение ударного тока КЗ</i>:</h5>';
+                    string += 'i<sub>уд.max</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.max</sub><sup>(3)</sup> &times; K<sub>уд</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3max) + ' &times; ' + koefUd(R, X) + ' = ' + customRound(iudmax) + ' кА;<br>';
+                    string += 'i<sub>уд.min</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.min</sub><sup>(3)</sup> &times; K<sub>уд</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3min) + ' &times; ' + koefUd(R + arcResistance, X) + ' = ' + customRound(iudmin) + ' кА;<br>';
+                    string += 'K<sub>уд</sub> - <i>Ударный коэффициент (<a href=\"#koeff\">см. кривые зависимости ударного коэффициента от отношений R/X и X/R</a>).</i></p>';
 
                 } else if (lastElement.key == 'ad') {
-                    // obj.ik3max = resistance.ead / (Math.sqrt(Math.pow(resistance.rad + obj.r, 2) + Math.pow(resistance.xad + obj.x, 2)));
-                    // obj.ik3min = resistance.ead / (Math.sqrt(Math.pow(resistance.rad + obj.r + arcResistance, 2) + Math.pow(resistance.xad + obj.x, 2)));
-                    // obj.ia0max = Math.sqrt(2) * obj.ik3max;
-                    // obj.ia0min = Math.sqrt(2) * obj.ik3min;
-                    // let tp = (resistance.xad + obj.x) / (314 * resistance.r2);
-                    // let ta = (resistance.xad + obj.x) / (314 * (resistance.r1 + obj.r));
-                    // obj.iudmax = Math.sqrt(2) * obj.ik3max * (Math.exp(-0.01 / tp) + Math.exp(-0.01 / ta));
-                    // obj.iudmin = Math.sqrt(2) * obj.ik3min * (Math.exp(-0.01 / tp) + Math.exp(-0.01 / ta));
+                    ik3max = resistance.ead / (Math.sqrt(Math.pow(resistance.rad + R, 2) + Math.pow(resistance.xad + X, 2)));
+                    ik3min = resistance.ead / (Math.sqrt(Math.pow(resistance.rad + R + arcResistance, 2) + Math.pow(resistance.xad + X, 2)));
+                    ia0max = Math.sqrt(2) * ik3max;
+                    ia0min = Math.sqrt(2) * ik3min;
+                    let tp = (resistance.xad + X) / (314 * resistance.r2);
+                    let ta = (resistance.xad + X) / (314 * (resistance.r1 + R));
+                    let taMin = (resistance.xad + X) / (314 * (resistance.r1 + R + arcResistance));
+                    iudmax = Math.sqrt(2) * ik3max * (Math.exp(-0.01 / tp) + Math.exp(-0.01 / ta));
+                    iudmin = Math.sqrt(2) * ik3min * (Math.exp(-0.01 / tp) + Math.exp(-0.01 / taMin));
+                    string += '<h5><i>Максимальное значение трехфазного тока КЗ</i>:</h5>';
+                    string += '<div class="table-responsive"><table style="min-width: 400px;"><tr><td rowspan="2">I<sub>к.max</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">E&Prime;<sub>ф.ад</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">' + customRound(resistance.ead, 1) + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(ik3max) + ' кА;</td></tr><tr><td style="border-top: 1px solid #000;text-align:center;"> &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(R<sub>&sum;</sub><sup>2</sup> + X<sub>&sum;</sub><sup>2</sup></td><td style="border-top: 1px solid #000;">&radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">' + customRound(R) + '<sup>2</sup> + ' + customRound(X) + '<sup>2</sup></td></tr></table><br></div>';
+                    string += '<h5><i>Минимальное значение трехфазного тока КЗ (с учетом сопротивления дуги)</i>:</h5>';
+                    string += '<div class="table-responsive"><table style="min-width: 400px;"><tr><td rowspan="2">I<sub>к.max</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">E&Prime;<sub>ф.ад</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">' + customRound(resistance.ead, 1) + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(ik3min) + ' кА;</td></tr><tr><td style="border-top: 1px solid #000;text-align:center;"> &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(R<sub>&sum;</sub><sup>2</sup> + X<sub>&sum;</sub><sup>2</sup></td><td style="border-top: 1px solid #000;">&radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">' + customRound(R) + '<sup>2</sup> + ' + customRound(X) + '<sup>2</sup></td></tr></table><br></div>';
+                    string += '<h5><i>Наибольшее начальное значение апериодической составляющей тока КЗ</i>:</h5>';
+                    string += 'i<sub>а0.max</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.max</sub><sup>(3)</sup> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3max) + ' = ' + customRound(ia0max) + ' кА;<br>';
+                    string += 'i<sub>а0.min</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.min</sub><sup>(3)</sup> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3min) + ' = ' + customRound(ia0min) + ' кА.<br>';
+                    string += '<h5><i>Значение ударного тока КЗ</i>:</h5>';
+                    string += 'i<sub>уд.max</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.max</sub><sup>(3)</sup> &times; K<sub>уд</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3max) + ' &times; ' + koefUd(R, X) + ' = ' + customRound(iudmax) + ' кА;<br>';
+                    string += 'i<sub>уд.min</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.min</sub><sup>(3)</sup> &times; K<sub>уд</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3min) + ' &times; ' + koefUd(R + arcResistance, X) + ' = ' + customRound(iudmin) + ' кА;<br>';
+                    string += 'K<sub>уд</sub> - <i>Ударный коэффициент (<a href=\"#koeff\">см. кривые зависимости ударного коэффициента от отношений R/X и X/R</a>).</i></p>';
                 } else if (lastElement.key == 'sd') {
-                    // obj.ik3max = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + obj.r, 2) + Math.pow(resistance.xsd + obj.x, 2)));
-                    // obj.ik3min = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + obj.r + arcResistance, 2) + Math.pow(resistance.xsd + obj.x, 2)));
-                    // obj.ia0max = Math.sqrt(2) * obj.ik3max;
-                    // obj.ia0min = Math.sqrt(2) * obj.ik3min;
-                    // let ta = (resistance.xsd + obj.x) / (314 * (resistance.rsd + obj.r));
-                    // obj.iudmax = Math.sqrt(2) * obj.ik3max * (1 + Math.exp(-0.01 / ta));
-                    // obj.iudmin = Math.sqrt(2) * obj.ik3min * (1 + Math.exp(-0.01 / ta));
+                    // ik3max = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + R, 2) + Math.pow(resistance.xsd + X, 2)));
+                    // ik3min = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + R + arcResistance, 2) + Math.pow(resistance.xsd + X, 2)));
+                    // ia0max = Math.sqrt(2) * ik3max;
+                    // ia0min = Math.sqrt(2) * ik3min;
+                    // let ta = (resistance.xsd + X) / (314 * (resistance.rsd + R));
+                    // let taMin = (resistance.xsd + X) / (314 * (resistance.rsd + R));
+                    // iudmax = Math.sqrt(2) * ik3max * (1 + Math.exp(-0.01 / ta));
+                    // iudmin = Math.sqrt(2) * ik3min * (1 + Math.exp(-0.01 / taMin));
                 }
             }
             return string;
