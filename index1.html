@@ -273,6 +273,7 @@
         var textLastEl = '<p class=\"text-danger\">Элемент \"{var}\" должен быть последним в схеме!</p>';
         var textCosPphi = '<p class=\"text-danger\">Введите значение cos&phi;!</p>';
         var textResistanceIsNotDefined = '<p class=\"text-danger\">На {var} не определены сопротивления!</p>';
+        var textIncorrectData = '<p class=\"text-danger\">Введены некорректные данные!</p>';
 
         window.onload = function () {
             var elementSelect = document.getElementById("elementSelect");
@@ -557,8 +558,8 @@
             }
             schemaObj.templates[rowId][templateArrayKey].textItem = elementText;
             calcResistance(rowId);
-            addResistance(rowId);
-            //console.log(schemaObj);
+            addResistance(rowId);  
+            //console.log(schemaObj);  
         }
 
         function changeElementTitleValue(elementId, rowId) {
@@ -769,7 +770,7 @@
                 let type = template[i].idItem.split('_');
                 let status = true;
                 if (template[i].valueItem == '' || template[i].valueItem == null) {
-                    status = false
+                    status = false;
                 }
                 power.push({
                     type: type[0],
@@ -801,14 +802,11 @@
                 }
 
                 let resist = {};
-                let Eng = 0;
-                let Z1ng = 0;
-                let Z2ng = 0;
-                let Z0ng = 0;
+                let Eng = 0, Z1ng = 0, Z2ng = 0, Z0ng = 0;
                 if (cosF == 0) {
                     customModal(textCosPphi);
                 } else {
-                    let current = powerSum / (Math.sqrt(3) * schemaObj.defaultVar.unn * cosF)
+                    let current = powerSum / (Math.sqrt(3) * schemaObj.defaultVar.unn * cosF);
                     let bazis = (380 * 1000) / (Math.sqrt(3) * current);
                     for (var j = 0; j < resPower.length; j++) {
                         Eng += getKoef(resPower[j][0], resPower[j][1]);
@@ -816,25 +814,31 @@
                         Z2ng += getKoef(resPower[j][0], resPower[j][3]);
                         Z0ng += getKoef(resPower[j][0], resPower[j][4]);
                     }
-                    resist = {
-                        Eng: 380 * Eng / j,
-                        Z1ng: bazis * Z1ng / j,
-                        Z2ng: bazis * Z2ng / j,
-                        Z0ng: bazis * Z0ng / j
+                    
+                    if (bazis && Eng && Z1ng && Z2ng && Z0ng) {
+                        resist = {
+                            Eng: 380 * Eng / j,
+                            Z1ng: bazis * Z1ng / j,
+                            Z2ng: bazis * Z2ng / j,
+                            Z0ng: bazis * Z0ng / j
+                        };
+                        schemaObj.resistance[rowId].powerSum = powerSum;
+                        schemaObj.resistance[rowId].current = current;
+                        schemaObj.resistance[rowId].cosF = cosF;
+                        schemaObj.resistance[rowId].bazis = bazis;
+                        schemaObj.resistance[rowId].EngRel = Eng / j;
+                        schemaObj.resistance[rowId].Z1ngRel = Z1ng / j;
+                        schemaObj.resistance[rowId].Z2ngRel = Z2ng / j;
+                        schemaObj.resistance[rowId].Z0ngRel = Z0ng / j;
+                        schemaObj.resistance[rowId].Eng = resist.Eng;
+                        schemaObj.resistance[rowId].Z1ng = resist.Z1ng;
+                        schemaObj.resistance[rowId].Z2ng = resist.Z2ng;
+                        schemaObj.resistance[rowId].Z0ng = resist.Z0ng;
+                        schemaObj.resistanceStatus[rowId] = true; 
+                        addResistance(rowId);                       
+                    } else {
+                        schemaObj.resistanceStatus[rowId] = false; 
                     }
-                    schemaObj.resistance[rowId].powerSum = powerSum;
-                    schemaObj.resistance[rowId].current = current;
-                    schemaObj.resistance[rowId].cosF = cosF;
-                    schemaObj.resistance[rowId].bazis = bazis;
-                    schemaObj.resistance[rowId].EngRel = Eng / j;
-                    schemaObj.resistance[rowId].Z1ngRel = Z1ng / j;
-                    schemaObj.resistance[rowId].Z2ngRel = Z2ng / j;
-                    schemaObj.resistance[rowId].Z0ngRel = Z0ng / j;
-                    schemaObj.resistance[rowId].Eng = resist.Eng;
-                    schemaObj.resistance[rowId].Z1ng = resist.Z1ng;
-                    schemaObj.resistance[rowId].Z2ng = resist.Z2ng;
-                    schemaObj.resistance[rowId].Z0ng = resist.Z0ng;
-                    schemaObj.resistanceStatus[rowId] = true;
                 }
             }
         }
@@ -859,17 +863,21 @@
                 rad = r1 + (0.96 * r2);
                 xad = Math.sqrt(Math.pow(zad, 2) - Math.pow(rad, 2));
                 ead = Math.sqrt(Math.pow(((220 * cosF) - (inom * rad / 1000)), 2) + Math.pow(((220 * sinF) - (inom * xad / 1000)), 2));
-                schemaObj.resistance[rowId].pmh = pmh;
-                schemaObj.resistance[rowId].sinF = sinF;
-                schemaObj.resistance[rowId].current = inom;
-                schemaObj.resistance[rowId].r1 = r1;
-                schemaObj.resistance[rowId].r2 = r2;
-                schemaObj.resistance[rowId].rad = rad;
-                schemaObj.resistance[rowId].xad = xad;
-                schemaObj.resistance[rowId].zad = zad;
-                schemaObj.resistance[rowId].ead = ead;
-                schemaObj.resistanceStatus[rowId] = true;
-                addResistance(rowId);
+                if (zad < rad) {
+                    customModal(textIncorrectData);
+                } else {
+                    schemaObj.resistance[rowId].pmh = pmh;
+                    schemaObj.resistance[rowId].sinF = sinF;
+                    schemaObj.resistance[rowId].current = inom;
+                    schemaObj.resistance[rowId].r1 = r1;
+                    schemaObj.resistance[rowId].r2 = r2;
+                    schemaObj.resistance[rowId].rad = rad;
+                    schemaObj.resistance[rowId].xad = xad;
+                    schemaObj.resistance[rowId].zad = zad;
+                    schemaObj.resistance[rowId].ead = ead;
+                    schemaObj.resistanceStatus[rowId] = true;
+                    addResistance(rowId);
+                }
             } else {
                 schemaObj.resistanceStatus[rowId] = false;
             }
@@ -942,7 +950,8 @@
             if (insert === undefined) {
                 insert = false;
             }
-            let html = '<span>';
+            let html = '';
+            html += '<span>';
             if (schemaObj.elements[rowId].key == 'complex') {
                 if (schemaObj.resistanceStatus[rowId] != false) {
                     if (schemaObj.resistance[rowId].Z1ng !== 0 && schemaObj.resistance[rowId].Z1ng !== null) {
@@ -1521,9 +1530,9 @@
             string += '<table style="min-width: 345px;"><tr><td rowspan="2">Z<sub>б</sub>&nbsp;=&nbsp;</td><td style="text-align:center;">U<sub>б</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">380 &times; 10<sup>3</sup></td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' мОм.</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; I<sub>' + index + '</sub></td><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; ' + customRound(schemaObj.resistance[rowId].current, 1) + '</td></tr></table>';
             string += 'Параметры комплексной нагрузки в именованых единицах:<br>';
             string += 'E&Prime;<sub>НГ</sub> = E&Prime;<sub>&lowast;НГ</sub> &times; U<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].EngRel) + ' &times; 380 = ' + customRound(schemaObj.resistance[rowId].Eng, 1) + ' В;<br>';
-            string += 'Z<sub>1НГ</sub> = Z<sub>&lowast;1НГ</sub> &times; Z<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].Z1ngRel) + ' &times; ' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' = ' + customRound(schemaObj.resistance[rowId].Z1ng, 1) + ' мОм;<br>';
-            string += 'Z<sub>2НГ</sub> = Z<sub>&lowast;2НГ</sub> &times; Z<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].Z2ngRel) + ' &times; ' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' = ' + customRound(schemaObj.resistance[rowId].Z2ng, 1) + ' мОм;<br>';
-            string += 'Z<sub>0НГ</sub> = Z<sub>&lowast;0НГ</sub> &times; Z<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].Z0ngRel) + ' &times; ' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' = ' + customRound(schemaObj.resistance[rowId].Z0ng, 1) + ' мОм.<br>';
+            string += 'Z<sub>1нг</sub> = Z<sub>&lowast;1НГ</sub> &times; Z<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].Z1ngRel) + ' &times; ' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' = ' + customRound(schemaObj.resistance[rowId].Z1ng, 1) + ' мОм;<br>';
+            string += 'Z<sub>2нг</sub> = Z<sub>&lowast;2НГ</sub> &times; Z<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].Z2ngRel) + ' &times; ' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' = ' + customRound(schemaObj.resistance[rowId].Z2ng, 1) + ' мОм;<br>';
+            string += 'Z<sub>0нг</sub> = Z<sub>&lowast;0НГ</sub> &times; Z<sub>б</sub>&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].Z0ngRel) + ' &times; ' + customRound(schemaObj.resistance[rowId].bazis, 1) + ' = ' + customRound(schemaObj.resistance[rowId].Z0ng, 1) + ' мОм.<br>';
             string += '</div>';
             return string;
         }
@@ -1569,31 +1578,26 @@
             string += '<table style="min-width: 380px;"><tr><td rowspan="2">Z<sub>сд</sub>&nbsp;=&nbsp;</td><td style="text-align:center;">U<sub>ном</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">0,38 &times; 10<sup>6</sup></td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.resistance[rowId].zsd) + ' мОм.</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; I<sub>ном</sub></td><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; ' + customRound(schemaObj.resistance[rowId].current, 1) + '</td></tr></table>';
             string += 'Сверхпереходное сопротивление синхронного дигателя:<br>';
             string += 'X&Prime;<sub>d</sub> = 0.15 &times; Z<sub>сд</sub> = 0.15 &times; ' + customRound(schemaObj.resistance[rowId].zsd) + ' = ' + customRound(schemaObj.resistance[rowId].xsd) + ' мОм.<br>';
-            string += 'Aктивное сопротивление в начальный момент КЗ:<br>';
+            string += 'Aктивное сопротивление:<br>';
             string += 'R<sub>сд</sub> = 0.15 &times; X&Prime;<sub>d</sub> = 0.15 &times; ' + customRound(schemaObj.resistance[rowId].xsd) + ' = ' + customRound(schemaObj.resistance[rowId].rsd) + ' мОм.<br>';
+            string += 'Сверхпереходная ЭДС синхронного дигателя:<br>';
+            string += 'E&Prime;<sub>ф.сд</sub> = &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(U<sub>ф</sub> - I<sub>ном</sub> &times; X&Prime;<sub>d</sub> &times; sin&phi;)<sup>2</sup> + (I<sub>ном</sub> &times; X&Prime;<sub>d</sub> &times; cos&phi;)<sup>2</sup></div>;<br><br>';
+            string += 'E&Prime;<sub>ф.сд</sub> = &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(220 - ' + customRound(schemaObj.resistance[rowId].current, 1) + ' &times; ' + customRound(schemaObj.resistance[rowId].xsd/1000, 4) + ' &times; ' + customRound(schemaObj.resistance[rowId].sinF) + ')<sup>2</sup> + (' + customRound(schemaObj.resistance[rowId].current, 1) + ' &times; ' + customRound(schemaObj.resistance[rowId].xsd/1000, 4) + ' &times; ' + schemaObj.templates[rowId][1].valueItem + ')<sup>2</sup></div> = ' + customRound(schemaObj.resistance[rowId].esd, 1) + ' В.<br>';
             string += '</div>';
             return string;
         }
 
         function reportCalcKz() {
             let string = '';
+            let lastElement = lastElementObj(schemaObj.elements);
+            let firstElement = firstElementObj(schemaObj.elements);
             for (let kzIdkey in schemaObj.kzId) {
                 string += '<div class="area">';
-                string += '<div class="area-result"><h3>Расчет КЗ на участке ' + kzIdkey + ':</h3>';
+                string += '<div class="area-result"><h3>Расчет КЗ на участке ' + kzIdkey + '</h3>';
+                string += '<h4>' + firstElement.name + ' - Точка К' + kzIdkey + ':</h4>';
                 string += '<h5><i>Суммарное сопротивление цепи</i>:</h5>';
-                let i = 0;
-                let formulaR = '';
-                let formulaX = '';
-                let formulaR0 = '';
-                let formulaX0 = '';
-                let valuesR = '';
-                let valuesX = '';
-                let valuesR0 = '';
-                let valuesX0 = '';
-                let R = 0;
-                let X = 0;
-                let R0 = 0;
-                let X0 = 0;
+                let formulaR = '', formulaX = '', formulaR0 = '', formulaX0 = '', valuesR = '', valuesX = '', valuesR0 = '', valuesX0 = ''; 
+                let i = 0, R = 0, X = 0, R0 = 0, X0 = 0;
                 let pls = ' + ';
                 for (let rowId in schemaObj.resistance) {
                     if (schemaObj.resistance[rowId].r !== 0) {
@@ -1658,7 +1662,98 @@
                 string += '<h5><i>Минимальное значение однофазного тока КЗ (с учетом сопротивления дуги)</i>:</h5>';
                 string += '<div class="table-responsive"><table style="min-width:400px;"><tr><td rowspan="2">I<sub>к.min</sub><sup>(1)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">&radic;<span style="text-decoration:overline;">3</span> &times; U<sub>нн</sub> &times; 10<sup>3</sup></td><td rowspan="2"> ;</td></tr><tr><td style="border-top: 1px solid #000;">&radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(2&times(R<sub>&sum;</sub> + R<sub>д</sub>) + R<sub>0&sum;</sub> + R<sub>д</sub>)<sup>2</sup> + (2&timesX<sub>&sum;</sub> + X<sub>0&sum;</sub>)<sup>2</sup></div></td></tr></table><br></div>';
                 string += '<div class="table-responsive"><table style="min-width: 590px;"><tr><td rowspan="2">I<sub>к.min</sub><sup>(1)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">&radic;<span style="text-decoration:overline;">3</span> &times; ' + schemaObj.defaultVar.unn + ' &times; 1000</td><td rowspan="2"> = ' + ik1min + ' кА.</td></tr><tr><td style="border-top: 1px solid #000;">&radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(2&times(' + customRound(R) + ' + ' + schemaObj.defaultVar.arcResistance + ') + ' + customRound(R0) + ' + ' + schemaObj.defaultVar.arcResistance + ')<sup>2</sup> + (2&times' + customRound(X) + ' + ' + customRound(X0) + ')<sup>2</sup></div></td></tr></table></div>';
-                string += '</div></div>';
+                string += reportCalcKzInverse(kzIdkey, lastElement);
+                string += '</div></div>';     
+            }
+            return string;
+        }
+
+        function reportCalcKzInverse(kzIdkey, lastElement) {
+            let string = '';
+            if ((lastElement && lastElement.key == 'complex') || (lastElement && lastElement.key == 'ad') || (lastElement && lastElement.key == 'sd')) {
+                string += '<br><h4>Точка К' + kzIdkey + ' - ' + lastElement.name + ':</h4>';
+                let resistance = schemaObj.resistance[lastElement.rowId];
+                let arcResistance = schemaObj.defaultVar.arcResistance * 1;
+                let R = 0, X = 0, R0 = 0, X0 = 0;
+                let formulaR = '', formulaX = '', formulaR0 = '', formulaX0 = '', valuesR = '', valuesX = '', valuesR0 = '', valuesX0 = ''; 
+                let pls = ' + ';
+                for (let rowId in schemaObj.resistance) { //Inverse
+                    if (rowId <= kzIdkey || schemaObj.elements[rowId].key == 'complex' || schemaObj.elements[rowId].key == 'ad' || schemaObj.elements[rowId].key == 'sd') {
+                        continue;
+                    } else {
+                        if (schemaObj.resistance[rowId].r !== 0) {
+                            formulaR += 'R<sub>' + symbol[schemaObj.elements[rowId].key] + '</sub>' + pls;
+                            valuesR += customRound(schemaObj.resistance[rowId].r) + pls;
+                            R += schemaObj.resistance[rowId].r;
+                        }
+                        if (schemaObj.resistance[rowId].x !== 0) {
+                            formulaX += 'X<sub>' + symbol[schemaObj.elements[rowId].key] + '</sub>' + pls;
+                            valuesX += customRound(schemaObj.resistance[rowId].x) + pls;
+                            X += schemaObj.resistance[rowId].x;
+                        }
+                        if (schemaObj.resistance[rowId].r0 !== 0) {
+                            formulaR0 += 'R<sub>0' + symbol[schemaObj.elements[rowId].key] + '</sub>' + pls;
+                            valuesR0 += customRound(schemaObj.resistance[rowId].r0) + pls;
+                            R0 += schemaObj.resistance[rowId].r0;
+                        }
+                        if (schemaObj.resistance[rowId].x0 !== 0) {
+                            formulaX0 += 'X<sub>0' + symbol[schemaObj.elements[rowId].key] + '</sub>' + pls;
+                            valuesX0 += customRound(schemaObj.resistance[rowId].x0) + pls;
+                            X0 += schemaObj.resistance[rowId].x0;
+                        }
+                    }
+                }
+                if (formulaR != '') {
+                    string += 'R<sub>&sum;</sub> = ' + formulaR.replace(/\+ $/g, '') + ' = ' + valuesR.replace(/\+ $/g, '') + ' = ' + customRound(R) + ' мОм;<br>';
+                } else {
+                    string += 'R<sub>&sum;</sub> = ' + customRound(R) + ' мОм;<br>';
+                }
+                if (formulaX0 != '') {
+                    string += 'X<sub>&sum;</sub> = ' + formulaX.replace(/\+ $/g, '') + ' = ' + valuesX.replace(/\+ $/g, '') + ' = ' + customRound(X) + ' мОм;<br>';
+                } else {
+                    string += 'X<sub>&sum;</sub> = ' + customRound(X) + ' мОм;<br>';
+                }
+                if (formulaR0 != '') {
+                    string += 'R<sub>0&sum;</sub> = ' + formulaR0.replace(/\+ $/g, '') + ' = ' + valuesR0.replace(/\+ $/g, '') + ' = ' + customRound(R0) + ' мОм;<br>';
+                } else {
+                    string += 'R<sub>0&sum;</sub> = ' + customRound(R0) + ' мОм;<br>';
+                }
+                if (formulaX0 != '') {
+                    string += 'X<sub>0&sum;</sub> = ' + formulaX0.replace(/\+ $/g, '') + ' = ' + valuesX0.replace(/\+ $/g, '') + ' = ' + customRound(X0) + ' мОм;<br>';
+                } else {
+                    string += 'X<sub>0&sum;</sub> = ' + customRound(X0) + ' мОм;<br>';
+                }
+                if (lastElement.key == 'complex') {
+                    let sinF = Math.sin(Math.acos(resistance.cosF));
+                    // obj.ik3max = resistance.Eng / (Math.sqrt(3) * Math.sqrt(Math.pow(resistance.Z1ng * resistance.cosF + obj.r, 2) + Math.pow(resistance.Z1ng * sinF + obj.x, 2)));
+                    // obj.ik3min = resistance.Eng / (Math.sqrt(3) * Math.sqrt(Math.pow(resistance.Z1ng * resistance.cosF + obj.r + arcResistance, 2) + Math.pow(resistance.Z1ng * sinF + obj.x, 2)));
+                    // obj.ia0max = Math.sqrt(2) * obj.ik3max;
+                    // obj.ia0min = Math.sqrt(2) * obj.ik3min;
+                    // obj.iudmax = Math.sqrt(2) * obj.ik3max * koefUd(obj.r, obj.x);
+                    // obj.iudmin = Math.sqrt(2) * obj.ik3min * koefUd(obj.r + arcResistance, obj.x);
+                    string += '<h5><i>Максимальное значение трехфазного тока КЗ</i>:</h5>';
+                    string += '<div class="table-responsive"><table style="min-width: 450px;"><tr><td rowspan="2">I<sub>к.max</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">E&Prime;<sub>нг</sub></td><td rowspan="2">;</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(Z<sub>1нг</sub> &times; cos&phi; &times; R<sub>&sum;</sub>)<sup>2</sup> + (Z<sub>1нг</sub> &times; sin&phi; &times; X<sub>&sum;</sub>)<sup>2</sup></div></td></tr></table><br></div>';
+                    string += '<div class="table-responsive"><table style="min-width: 590px;"><tr><td rowspan="2">I<sub>к.max</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">' + customRound(resistance.Eng, 1) + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(schemaObj.calcInverse[kzIdkey].ik3max) + ' кА;</td></tr><tr><td style="border-top: 1px solid #000;"> &radic;<span style="text-decoration:overline;">3</span> &times; &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(' + customRound(resistance.Z1ng) + ' &times; ' + resistance.cosF + ' &times; ' + customRound(R) + ')<sup>2</sup> + (' + customRound(resistance.Z1ng) + ' &times; ' + customRound(sinF) + ' &times; ' + customRound(X) + ')<sup>2</sup></div></td></tr></table><br></div>';
+                    string += '<h5><i>Минимальное значение трехфазного тока КЗ (с учетом сопротивления дуги)</i>:</h5>';
+
+                } else if (lastElement.key == 'ad') {
+                    // obj.ik3max = resistance.ead / (Math.sqrt(Math.pow(resistance.rad + obj.r, 2) + Math.pow(resistance.xad + obj.x, 2)));
+                    // obj.ik3min = resistance.ead / (Math.sqrt(Math.pow(resistance.rad + obj.r + arcResistance, 2) + Math.pow(resistance.xad + obj.x, 2)));
+                    // obj.ia0max = Math.sqrt(2) * obj.ik3max;
+                    // obj.ia0min = Math.sqrt(2) * obj.ik3min;
+                    // let tp = (resistance.xad + obj.x) / (314 * resistance.r2);
+                    // let ta = (resistance.xad + obj.x) / (314 * (resistance.r1 + obj.r));
+                    // obj.iudmax = Math.sqrt(2) * obj.ik3max * (Math.exp(-0.01 / tp) + Math.exp(-0.01 / ta));
+                    // obj.iudmin = Math.sqrt(2) * obj.ik3min * (Math.exp(-0.01 / tp) + Math.exp(-0.01 / ta));
+                } else if (lastElement.key == 'sd') {
+                    // obj.ik3max = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + obj.r, 2) + Math.pow(resistance.xsd + obj.x, 2)));
+                    // obj.ik3min = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + obj.r + arcResistance, 2) + Math.pow(resistance.xsd + obj.x, 2)));
+                    // obj.ia0max = Math.sqrt(2) * obj.ik3max;
+                    // obj.ia0min = Math.sqrt(2) * obj.ik3min;
+                    // let ta = (resistance.xsd + obj.x) / (314 * (resistance.rsd + obj.r));
+                    // obj.iudmax = Math.sqrt(2) * obj.ik3max * (1 + Math.exp(-0.01 / ta));
+                    // obj.iudmin = Math.sqrt(2) * obj.ik3min * (1 + Math.exp(-0.01 / ta));
+                }
             }
             return string;
         }
@@ -1704,7 +1799,7 @@
                     pointKz = ' pointKz';
                     pointKzImg = '<span>К' + rowId + '</span> ' + pointKzSvg;
                 }
-                string += '        <div class="' + schemaObj.elements[rowId].key + 'Img' + pointKz + '">';
+                string += '        <div class="' + schemaObj.elements[rowId].key + 'Image' + pointKz + '">';
                 string += '            <div class="resistanceData">' + addResistance(rowId, true) + '</div>';
                 string += '            <div id="pointKzWrapper' + rowId + '" class="pointKzWrapper">' + pointKzImg + '</div>';
                 string += img;
@@ -1780,8 +1875,9 @@
             let resultBlock = document.getElementById('projectResult');
             let setBlock = document.getElementById('projectSet');
             if (close) {
-                    resultBlock.innerHTML = '';
-                    setBlock.style.display = 'block';
+                window.scrollTo(0, 0);
+                resultBlock.innerHTML = '';
+                setBlock.style.display = 'block';
             }           
         }
 
@@ -1814,6 +1910,7 @@
                         name = 'Проект ';
                     } else {
                         name = name.replace(/[\\\|\'\"\#^\:\;\\$\%\&\?\/]/g, '');
+                        name += ' ';
                     }
                     let date = getDate();
                     let id = date.replace(/[.: ]/g, '');
@@ -1898,6 +1995,7 @@
                         name = 'Проект ';
                     } else {
                         name = name.replace(/[\\\|\'\"\#^\:\;\\$\%\&\?\/]/g, '');
+                        name += ' ';
                     }
                     let type = 'text/plain';
                     let date = getDate();
@@ -2070,11 +2168,10 @@
             changeElementCos(rowId, elSelectValue);
             if (elSelectValue == '') {
                 document.getElementById("complex-data").innerHTML = '';
-                addResistance(rowId);
             } else {
-                renderTemplComplex(elSelectValue, rowId);
-                changeElementValue(elementId, rowId);
+                renderTemplComplex(elSelectValue, rowId); 
             }
+            document.getElementById("complexResistance" + rowId).innerHTML = '';
         }
 
         function renderTemplComplex(elSelectValue, rowId) {
