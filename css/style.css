@@ -76,10 +76,10 @@
         content: "";
         position: absolute;
         display: block;
-        width: 71px;
+        width: 150px;
         height: 25px;
-        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="2" height="30.11" viewBox="0 0 2 30.11"><rect width="2" height="30.11"/><polygon points="2 0 0 0 0 30.11 2 30.11 2 0 2 0"/></svg>') no-repeat 36px 0;
-        top: -22px;
+        background: url("../images/div.svg") no-repeat;
+        top: -25px;
     }
 
     tr:first-child td.elementScheme div::before {
@@ -169,3 +169,12 @@
     #dataFileBlock {
         display: none;
     }
+
+    #projectResult .resistanceData {
+        padding-top: 5px;
+    }
+
+    #projectResult .sdImg .resistanceData, #projectResult .adImg .resistanceData {
+        padding-top: 25px;
+    }
+
