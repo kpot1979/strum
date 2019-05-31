@@ -1246,7 +1246,7 @@
                             index = index.join('');
                             let alert = '';
                             if (schemaObj.resistance[lastElement.rowId].current < (10 * calc[pointKz].ik3max)) {
-                                alert = '<br><span class="text-danger">I<sub>' + index + '</sub> = ' + customRound(schemaObj.resistance[lastElement.rowId].current, 1) + 'А < ' + customRound(calc[pointKz].ik3max * 10, 1) + 'А (0,01 * I<sub>к.max</sub>), значит его можно не учитывать!</span>';
+                                alert = '<br><span class="text-danger">I<sub>' + index + '</sub> = ' + customRound(schemaObj.resistance[lastElement.rowId].current, 1) + 'А < ' + customRound(calc[pointKz].ik3max * 10, 1) + 'А (0,01 &times; I<sub>к.max</sub>), значит его можно не учитывать!</span>';
                             }
                             string += "<tr>";
                             string += "    <td>Точка К" + pointKz + " - " + lastElement.name + alert + "</td>";
@@ -1676,15 +1676,20 @@
                 string += '<h5><i>Минимальное значение однофазного тока КЗ (с учетом сопротивления дуги)</i>:</h5>';
                 string += '<div class="table-responsive"><table style="min-width:400px;"><tr><td rowspan="2">I<sub>к.min</sub><sup>(1)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">&radic;<span style="text-decoration:overline;">3</span> &times; U<sub>нн</sub> &times; 10<sup>3</sup></td><td rowspan="2"> ;</td></tr><tr><td style="border-top: 1px solid #000;">&radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(2&times(R<sub>&sum;</sub> + R<sub>д</sub>) + R<sub>0&sum;</sub> + R<sub>д</sub>)<sup>2</sup> + (2&timesX<sub>&sum;</sub> + X<sub>0&sum;</sub>)<sup>2</sup></div></td></tr></table><br></div>';
                 string += '<div class="table-responsive"><table style="min-width: 590px;"><tr><td rowspan="2">I<sub>к.min</sub><sup>(1)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">&radic;<span style="text-decoration:overline;">3</span> &times; ' + schemaObj.defaultVar.unn + ' &times; 1000</td><td rowspan="2"> = ' + ik1min + ' кА.</td></tr><tr><td style="border-top: 1px solid #000;">&radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(2&times(' + customRound(R) + ' + ' + schemaObj.defaultVar.arcResistance + ') + ' + customRound(R0) + ' + ' + schemaObj.defaultVar.arcResistance + ')<sup>2</sup> + (2&times' + customRound(X) + ' + ' + customRound(X0) + ')<sup>2</sup></div></td></tr></table></div>';
-                string += reportCalcKzInverse(kzIdkey, lastElement);
+                string += reportCalcKzInverse(kzIdkey, firstElement, lastElement, [ik3max, ik3min, ika0max, ika0min, ikudmax, ikudmin, ik2max, ik2min, ik1max, ik1min]);
                 string += '</div></div>';
             }
             return string;
         }
 
-        function reportCalcKzInverse(kzIdkey, lastElement) {
+        function reportCalcKzInverse(kzIdkey, firstElement, lastElement, ikArr) { //ikArr => [ik3max, ik3min, ika0max, ika0min, ikudmax, ikudmin, ik2max, ik2min, ik1max, ik1min]
             let string = '';
             if ((lastElement && lastElement.key == 'complex') || (lastElement && lastElement.key == 'ad') || (lastElement && lastElement.key == 'sd')) {
+                let indexArr = lastElement.name.split(" ");
+                let index = indexArr.map(function (item) {
+                    return item[0].toUpperCase();
+                });
+                index = index.join('');
                 string += '<br><h4>Точка К' + kzIdkey + ' - ' + lastElement.name + ':</h4>';
                 let resistance = schemaObj.resistance[lastElement.rowId];
                 let arcResistance = schemaObj.defaultVar.arcResistance * 1;
@@ -1738,8 +1743,9 @@
                 } else {
                     string += 'X<sub>0&sum;</sub> = ' + customRound(X0) + ' мОм;<br>';
                 }
-                let ik3max, ik3min, ia0max, ia0min, iudmax, iudmin, sinF;
+                let ik3max, ik3min, ia0max, ia0min, iudmax, iudmin, sinF, title;
                 if (lastElement.key == 'complex') {
+                    title = 'комплексной нагрузки';
                     sinF = Math.sin(Math.acos(resistance.cosF));
                     ik3max = resistance.Eng / (Math.sqrt(3) * Math.sqrt(Math.pow(resistance.Z1ng * resistance.cosF + R, 2) + Math.pow(resistance.Z1ng * sinF + X, 2)));
                     ik3min = resistance.Eng / (Math.sqrt(3) * Math.sqrt(Math.pow(resistance.Z1ng * resistance.cosF + R + arcResistance, 2) + Math.pow(resistance.Z1ng * sinF + X, 2)));
@@ -1762,6 +1768,7 @@
                     string += 'K<sub>уд</sub> - <i>Ударный коэффициент (<a href=\"#koeff\">см. кривые зависимости ударного коэффициента от отношений R/X и X/R</a>).</i></p>';
 
                 } else if (lastElement.key == 'ad') {
+                    title = 'асинхронного дигателя';
                     ik3max = resistance.ead / (Math.sqrt(Math.pow(resistance.rad + R, 2) + Math.pow(resistance.xad + X, 2)));
                     ik3min = resistance.ead / (Math.sqrt(Math.pow(resistance.rad + R + arcResistance, 2) + Math.pow(resistance.xad + X, 2)));
                     ia0max = Math.sqrt(2) * ik3max;
@@ -1772,25 +1779,70 @@
                     iudmax = Math.sqrt(2) * ik3max * (Math.exp(-0.01 / tp) + Math.exp(-0.01 / ta));
                     iudmin = Math.sqrt(2) * ik3min * (Math.exp(-0.01 / tp) + Math.exp(-0.01 / taMin));
                     string += '<h5><i>Максимальное значение трехфазного тока КЗ</i>:</h5>';
-                    string += '<div class="table-responsive"><table style="min-width: 400px;"><tr><td rowspan="2">I<sub>к.max</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">E&Prime;<sub>ф.ад</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">' + customRound(resistance.ead, 1) + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(ik3max) + ' кА;</td></tr><tr><td style="border-top: 1px solid #000;text-align:center;"> &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">R<sub>&sum;</sub><sup>2</sup> + X<sub>&sum;</sub><sup>2</sup></td><td style="border-top: 1px solid #000;">&radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">' + customRound(R) + '<sup>2</sup> + ' + customRound(X) + '<sup>2</sup></td></tr></table><br></div>';
+                    string += '<div class="table-responsive"><table style="min-width: 300px;"><tr><td rowspan="2">I<sub>к.max</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">E&Prime;<sub>ф.ад</sub></td><td rowspan="2">;</td></tr><tr><td style="border-top: 1px solid #000;text-align:center;"> &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(R<sub>ад</sub> + R<sub>&sum;</sub>)<sup>2</sup> + (X&Prime;<sub>ад</sub> + X<sub>&sum;</sub>)<sup>2</sup></td></tr></table><br></div>';
+                    string += '<div class="table-responsive"><table style="min-width: 400px;"><tr><td rowspan="2">I<sub>к.max</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">' + customRound(resistance.ead, 1) + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(ik3max) + ' кА.</td></tr><tr><td style="border-top: 1px solid #000;">&radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(' + customRound(resistance.rad) + ' + ' + customRound(R) + ')<sup>2</sup> + (' + customRound(resistance.xad) + ' + ' + customRound(X) + ')<sup>2</sup></td></tr></table><br></div>';
                     string += '<h5><i>Минимальное значение трехфазного тока КЗ (с учетом сопротивления дуги)</i>:</h5>';
-                    string += '<div class="table-responsive"><table style="min-width: 400px;"><tr><td rowspan="2">I<sub>к.max</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">E&Prime;<sub>ф.ад</sub></td><td rowspan="2">&nbsp;=&nbsp;</td><td style="text-align:center;">' + customRound(resistance.ead, 1) + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(ik3min) + ' кА;</td></tr><tr><td style="border-top: 1px solid #000;text-align:center;"> &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">R<sub>&sum;</sub><sup>2</sup> + X<sub>&sum;</sub><sup>2</sup></td><td style="border-top: 1px solid #000;">&radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">' + customRound(R) + '<sup>2</sup> + ' + customRound(X) + '<sup>2</sup></td></tr></table><br></div>';
+                    string += '<div class="table-responsive"><table style="min-width: 320px;"><tr><td rowspan="2">I<sub>к.min</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">E&Prime;<sub>ф.ад</sub></td><td rowspan="2">;</td></tr><tr><td style="border-top: 1px solid #000;text-align:center;"> &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(R<sub>ад</sub> + R<sub>&sum;</sub> + R<sub>д</sub>)<sup>2</sup> + (X&Prime;<sub>ад</sub> + X<sub>&sum;</sub>)<sup>2</sup></td></tr></table><br></div>';
+                    string += '<div class="table-responsive"><table style="min-width: 420px;"><tr><td rowspan="2">I<sub>к.min</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">' + customRound(resistance.ead, 1) + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(ik3min) + ' кА.</td></tr><tr><td style="border-top: 1px solid #000;">&radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(' + customRound(resistance.rad) + ' + ' + customRound(R) + ' + ' + customRound(arcResistance) + ')<sup>2</sup> + (' + customRound(resistance.xad) + ' + ' + customRound(X) + ')<sup>2</sup></td></tr></table><br></div>';
                     string += '<h5><i>Наибольшее начальное значение апериодической составляющей тока КЗ</i>:</h5>';
                     string += 'i<sub>а0.max</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.max</sub><sup>(3)</sup> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3max) + ' = ' + customRound(ia0max) + ' кА;<br>';
                     string += 'i<sub>а0.min</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.min</sub><sup>(3)</sup> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3min) + ' = ' + customRound(ia0min) + ' кА.<br>';
                     string += '<h5><i>Значение ударного тока КЗ</i>:</h5>';
-                    string += 'i<sub>уд.max</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.max</sub><sup>(3)</sup> &times; K<sub>уд</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3max) + ' &times; ' + koefUd(R, X) + ' = ' + customRound(iudmax) + ' кА;<br>';
-                    string += 'i<sub>уд.min</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.min</sub><sup>(3)</sup> &times; K<sub>уд</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3min) + ' &times; ' + koefUd(R + arcResistance, X) + ' = ' + customRound(iudmin) + ' кА;<br>';
-                    string += 'K<sub>уд</sub> - <i>Ударный коэффициент (<a href=\"#koeff\">см. кривые зависимости ударного коэффициента от отношений R/X и X/R</a>).</i></p>';
+                    string += 'i<sub>уд.max</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.max</sub><sup>(3)</sup> &times; (e<sup>-0.01/Tp</sup> + e<sup>-0.01/Ta</sup>);<br><br>';
+                    string += 'T<sub>p</sub> - Расчетная постоянная времени затухания периодической составляющей тока статора, с;<br>';
+                    string += 'T<sub>a</sub> - Постоянная времени затухания апериодической составляющей тока статора, с;<br>';
+                    string += 'T<sub>p</sub> = X&Prime;<sub>ад</sub> + X<sub>&sum;</sub> / 314 &times; R<sub>2</sub> = ' + customRound(resistance.xad) + ' + ' + customRound(X) + ' / 314 &times; ' + customRound(resistance.r2) + ' = ' + customRound(tp) + ' с;<br>';
+                    string += 'T<sub>a</sub> =  X&Prime;<sub>ад</sub> + X<sub>&sum;</sub> / 314 &times; (R<sub>1</sub> + R<sub>&sum;</sub>) = ' + customRound(resistance.xad) + ' + ' + customRound(X) + ' / 314 &times; (' + customRound(resistance.r1) + ' + ' + customRound(R) + ') = ' + customRound(ta) + ' с.<br><br>';
+                    string += 'i<sub>уд.max</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3max) + ' &times; (e<sup>-0.01/' + customRound(tp) + '</sup> + e<sup>-0.01/' + customRound(ta) + '</sup>) = ' + customRound(iudmax) + ' кА.<br><br>';
+                    string += 'i<sub>уд.min</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.min</sub><sup>(3)</sup> &times; (e<sup>-0.01/Tp</sup> + e<sup>-0.01/Ta</sup>);<br><br>';
+                    string += 'T<sub>a</sub> =  X&Prime;<sub>ад</sub> + X<sub>&sum;</sub> / 314 &times; (R<sub>1</sub> + R<sub>&sum;</sub> + R<sub>д</sub>) = ' + customRound(resistance.xad) + ' + ' + customRound(X) + ' / 314 &times; (' + customRound(resistance.r1) + ' + ' + customRound(R) + ' + ' + customRound(arcResistance) + ') = ' + customRound(taMin) + ' с.<br><br>';
+                    string += 'i<sub>уд.min</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3min) + ' &times; (e<sup>-0.01/' + customRound(tp) + '</sup> + e<sup>-0.01/' + customRound(taMin) + '</sup>) = ' + customRound(iudmin) + ' кА.<br><br>';
                 } else if (lastElement.key == 'sd') {
-                    // ik3max = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + R, 2) + Math.pow(resistance.xsd + X, 2)));
-                    // ik3min = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + R + arcResistance, 2) + Math.pow(resistance.xsd + X, 2)));
-                    // ia0max = Math.sqrt(2) * ik3max;
-                    // ia0min = Math.sqrt(2) * ik3min;
-                    // let ta = (resistance.xsd + X) / (314 * (resistance.rsd + R));
-                    // let taMin = (resistance.xsd + X) / (314 * (resistance.rsd + R));
-                    // iudmax = Math.sqrt(2) * ik3max * (1 + Math.exp(-0.01 / ta));
-                    // iudmin = Math.sqrt(2) * ik3min * (1 + Math.exp(-0.01 / taMin));
+                    title = 'синхронного дигателя';
+                    ik3max = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + R, 2) + Math.pow(resistance.xsd + X, 2)));
+                    ik3min = resistance.esd / (Math.sqrt(Math.pow(resistance.rsd + R + arcResistance, 2) + Math.pow(resistance.xsd + X, 2)));
+                    ia0max = Math.sqrt(2) * ik3max;
+                    ia0min = Math.sqrt(2) * ik3min;
+                    let ta = (resistance.xsd + X) / (314 * (resistance.rsd + R));
+                    let taMin = (resistance.xsd + X) / (314 * (resistance.rsd + R + arcResistance));
+                    iudmax = Math.sqrt(2) * ik3max * (1 + Math.exp(-0.01 / ta));
+                    iudmin = Math.sqrt(2) * ik3min * (1 + Math.exp(-0.01 / taMin));
+                    string += '<h5><i>Максимальное значение трехфазного тока КЗ</i>:</h5>';
+                    string += '<div class="table-responsive"><table style="min-width: 300px;"><tr><td rowspan="2">I<sub>к.max</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">E&Prime;<sub>ф.сд</sub></td><td rowspan="2">;</td></tr><tr><td style="border-top: 1px solid #000;text-align:center;"> &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(R<sub>сд</sub> + R<sub>&sum;</sub>)<sup>2</sup> + (X&Prime;<sub>d</sub> + X<sub>&sum;</sub>)<sup>2</sup></td></tr></table><br></div>';
+                    string += '<div class="table-responsive"><table style="min-width: 400px;"><tr><td rowspan="2">I<sub>к.max</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">' + customRound(resistance.esd, 1) + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(ik3max) + ' кА.</td></tr><tr><td style="border-top: 1px solid #000;">&radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(' + customRound(resistance.rsd) + ' + ' + customRound(R) + ')<sup>2</sup> + (' + customRound(resistance.xsd) + ' + ' + customRound(X) + ')<sup>2</sup></td></tr></table><br></div>';
+                    string += '<h5><i>Минимальное значение трехфазного тока КЗ (с учетом сопротивления дуги)</i>:</h5>';
+                    string += '<div class="table-responsive"><table style="min-width: 320px;"><tr><td rowspan="2">I<sub>к.min</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">E&Prime;<sub>ф.сд</sub></td><td rowspan="2">;</td></tr><tr><td style="border-top: 1px solid #000;text-align:center;"> &radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(R<sub>сд</sub> + R<sub>&sum;</sub> + R<sub>д</sub>)<sup>2</sup> + (X&Prime;<sub>d</sub> + X<sub>&sum;</sub>)<sup>2</sup></td></tr></table><br></div>';
+                    string += '<div class="table-responsive"><table style="min-width: 420px;"><tr><td rowspan="2">I<sub>к.min</sub><sup>(3)</sup>&nbsp;=&nbsp;</td><td style="text-align:center;">' + customRound(resistance.esd, 1) + '</td><td rowspan="2">&nbsp;=&nbsp;' + customRound(ik3min) + ' кА.</td></tr><tr><td style="border-top: 1px solid #000;">&radic;<div style="border-top:1px solid #000;display:inline-block;margin-top:2px;">(' + customRound(resistance.rsd) + ' + ' + customRound(R) + ' + ' + customRound(arcResistance) + ')<sup>2</sup> + (' + customRound(resistance.xsd) + ' + ' + customRound(X) + ')<sup>2</sup></td></tr></table><br></div>';
+                    string += '<h5><i>Наибольшее начальное значение апериодической составляющей тока КЗ</i>:</h5>';
+                    string += 'i<sub>а0.max</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.max</sub><sup>(3)</sup> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3max) + ' = ' + customRound(ia0max) + ' кА;<br>';
+                    string += 'i<sub>а0.min</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.min</sub><sup>(3)</sup> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3min) + ' = ' + customRound(ia0min) + ' кА.<br>';
+                     string += '<h5><i>Значение ударного тока КЗ</i>:</h5>';
+                    string += 'i<sub>уд.max</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.max</sub><sup>(3)</sup> &times; (1 + e<sup>-0.01/Ta</sup>);<br><br>';
+                    string += 'T<sub>a</sub> - Постоянная времени затухания апериодической составляющей тока статора, с;<br>';
+                    string += 'T<sub>a</sub> =  X&Prime;<sub>d</sub> + X<sub>&sum;</sub> / 314 &times; (R<sub>сд</sub> + R<sub>&sum;</sub>) = ' + customRound(resistance.xsd) + ' + ' + customRound(X) + ' / 314 &times; (' + customRound(resistance.rsd) + ' + ' + customRound(R) + ') = ' + customRound(ta) + ' с.<br><br>';
+                    string += 'i<sub>уд.max</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3max) + ' &times; (1 + e<sup>-0.01/' + customRound(ta) + '</sup>) = ' + customRound(iudmax) + ' кА.<br><br>';
+                    string += 'i<sub>уд.min</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; I<sub>к.min</sub><sup>(3)</sup> &times; (1 + e<sup>-0.01/Ta</sup>).<br><br>';
+                    string += 'T<sub>a</sub> =  X&Prime;<sub>d</sub> + X<sub>&sum;</sub> / 314 &times; (R<sub>сд</sub> + R<sub>&sum;</sub> + R<sub>д</sub>) = ' + customRound(resistance.xsd) + ' + ' + customRound(X) + ' / 314 &times; (' + customRound(resistance.rsd) + ' + ' + customRound(R) + ' + ' + customRound(arcResistance) + ') = ' + customRound(taMin) + ' с.<br><br>';
+                    string += 'i<sub>уд.min</sub> = &radic;<span style="text-decoration:overline;">2</span> &times; ' + customRound(ik3min) + ' &times; (1 + e<sup>-0.01/' + customRound(taMin) + '</sup>) = ' + customRound(iudmin) + ' кА.<br><br>';
+                }
+                if (schemaObj.resistance[lastElement.rowId].current < (10 * ikArr[0])) {
+                    console.log(schemaObj);
+                    string += '<span class="text-danger"><strong>I<sub>' + index + '</sub> = ' + customRound(schemaObj.resistance[lastElement.rowId].current, 1) + 'А < ' + customRound(ikArr[0] * 10, 1) + 'А (0,01 &times; I<sub>к.max</sub>), значит ток подпитки от ' + title + ' можно не учитывать!</strong></span><br>';
+                    string += '<h4>Так как ток подпитки от ' + title + ' не учитываем, суммарный ток трехфазного КЗ на участке ' + kzIdkey + ' равен току в ветви ' + firstElement.name + ' - Точка К' + kzIdkey + ':</h4>';
+                    string += '<strong>I<sub>к.max</sub><sup>(3)</sup> = ' + customRound(ikArr[0]) + ' кА</strong>;<br>';
+                    string += '<strong>I<sub>к.min</sub><sup>(3)</sup> = ' + customRound(ikArr[1]) + ' кА</strong>;<br>';
+                    string += '<strong>i<sub>а0.max</sub> = ' + customRound(ikArr[2]) + ' кА</strong>;<br>';
+                    string += '<strong>i<sub>а0.min</sub> = ' + customRound(ikArr[3]) + ' кА</strong>;<br>';
+                    string += '<strong>i<sub>уд.max</sub> = ' + customRound(ikArr[4]) + ' кА</strong>;<br>';
+                    string += '<strong>i<sub>уд.min</sub> = ' + customRound(ikArr[5]) + ' кА</strong>.<br>';
+                } else {
+                    string += '<h4>Суммарный ток трехфазного КЗ на участке ' + kzIdkey + ' с учетом подпитки от ' + title + ':</h4>';
+                    string += '<strong>I<sub>к.max</sub><sup>(3)</sup> = ' + customRound(ikArr[0]) + ' + ' + customRound(ik3max) + ' = ' + customRound(ikArr[0] + ik3max) + ' кА</strong>;<br>';
+                    string += '<strong>I<sub>к.min</sub><sup>(3)</sup> = ' + customRound(ikArr[1]) + ' + ' + customRound(ik3min) + ' = ' + customRound(ikArr[1] + ik3min) + ' кА</strong>;<br>';
+                    string += '<strong>i<sub>а0.max</sub> = ' + customRound(ikArr[2]) + ' + ' + customRound(ia0max) + ' = ' + customRound(ikArr[2] + ia0max) + ' кА</strong>;<br>';
+                    string += '<strong>i<sub>а0.min</sub> = ' + customRound(ikArr[3]) + ' + ' + customRound(ia0min) + ' = ' + customRound(ikArr[3] + ia0min) + ' кА</strong>;<br>';
+                    string += '<strong>i<sub>уд.max</sub> = ' + customRound(ikArr[4]) + ' + ' + customRound(iudmax) + ' = ' + customRound(ikArr[4] + iudmax) + ' кА</strong>;<br>';
+                    string += '<strong>i<sub>уд.min</sub> = ' + customRound(ikArr[5]) + ' + ' + customRound(iudmin) + ' = ' + customRound(ikArr[5] + iudmin) + ' кА</strong>.<br>';
                 }
             }
             return string;
